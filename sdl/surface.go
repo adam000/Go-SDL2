@@ -16,6 +16,8 @@ type Surface struct {
 	s *C.SDL_Surface
 }
 
+// BEGIN Pixel Info {{{1
+
 // The following helpers are modified directly from SDL 2.0 source code:
 // include/SDL_pixels.h
 
@@ -146,6 +148,7 @@ func ISPIXELFORMAT_FOURCC(format PixelFormat) bool {
 
 type PixelFormat uint32
 
+// TODO constantize this on the file it's based on; I can use macros!
 // Original Note: If you modify this list, update SDL_GetPixelFormatName()
 // Note: this is backed by tests that verify the value the same way SDL does. If the SDL macros are
 // modified, the corresponding test here will need to be updated and run
@@ -188,7 +191,7 @@ const (
 	PIXELFORMAT_YVYU                    = 1431918169
 )
 
-// END types
+// END Pixel Info }}}1
 
 func (surface Surface) PixelData() (PixelData, error) {
 	if result := C.SDL_LockSurface(surface.s); result < 0 {

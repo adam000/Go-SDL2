@@ -1,5 +1,7 @@
 package sdl
 
+// TODO put these C functions in their own event.c file
+
 // #cgo pkg-config: sdl2
 // #cgo LDFLAGS: -lSDL2_image
 //
@@ -22,7 +24,7 @@ import (
 	"fmt"
 )
 
-// START EventType
+// START EventType {{{1
 
 type EventType uint16
 
@@ -119,9 +121,10 @@ const (
 	LASTEVENT EventType = 0xFFFF
 )
 
-// END EventType
+// END EventType }}}1
 
 type Event interface {
+	// TODO add Type() EventType
 	Timestamp() uint32
 }
 
