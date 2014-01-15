@@ -192,7 +192,7 @@ const (
 
 func (surface Surface) PixelData() (PixelData, error) {
 	if result := C.SDL_LockSurface(surface.s); result < 0 {
-		return PixelData{}, GetError()
+		return PixelData{}, getError()
 	}
 	return PixelData{s: surface.s}, nil
 }

@@ -48,7 +48,7 @@ func (e Error) Error() string {
 	return string(e)
 }
 
-func GetError() error {
+func getError() error {
 	// TODO(light): check for empty string?
 	return Error(C.GoString(C.SDL_GetError()))
 }
@@ -89,7 +89,7 @@ func CreateWindow(title string, x, y, w, h int, flags WindowFlag) (Window, error
 		return Window{window}, nil
 	}
 
-	return Window{}, GetError()
+	return Window{}, getError()
 }
 
 // Get the window's surface
