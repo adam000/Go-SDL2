@@ -127,11 +127,11 @@ type Event interface {
 
 func PollEvent() (ev Event) {
 	var cEvent C.SDL_Event
-	if isEvent := C.SDL_PollEvent(&cEvent); isEvent == 1 {
-		return convertEvent(&cEvent)
+	if isEvent := C.SDL_PollEvent(&cEvent); isEvent == 0 {
+		return nil
 	}
 
-	return nil
+	return convertEvent(&cEvent)
 }
 
 func convertEvent(cEvent *C.SDL_Event) (ev Event) {
