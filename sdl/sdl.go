@@ -94,7 +94,7 @@ func CreateWindow(title string, x, y, w, h int, flags WindowFlag) (Window, error
 
 // Get the window's surface
 func (w *Window) GetSurface() Surface {
-	return Surface(C.SDL_GetWindowSurface(w.w)))
+	return Surface{C.SDL_GetWindowSurface(w.w)}
 }
 
 func (w *Window) Destroy() {

@@ -116,7 +116,7 @@ func BITSPERPIXEL(X PixelFormat) uint32 {
 
 func BYTESPERPIXEL(X PixelFormat) PixelFormat {
 	if ISPIXELFORMAT_FOURCC(X) {
-		if X == PIXELFORMAT_YUY2 || X == PIXELFORMAT_UYVY || X == PIXELFORMAT_YVYU {
+		if X == PixelFormatYUY2 || X == PixelFormatUYVY || X == PixelFormatYVYU {
 			return 2
 		}
 		return 1
@@ -148,47 +148,43 @@ func ISPIXELFORMAT_FOURCC(format PixelFormat) bool {
 
 type PixelFormat uint32
 
-// TODO constantize this on the file it's based on; I can use macros!
-// Original Note: If you modify this list, update SDL_GetPixelFormatName()
-// Note: this is backed by tests that verify the value the same way SDL does. If the SDL macros are
-// modified, the corresponding test here will need to be updated and run
 const (
-	PIXELFORMAT_UNKNOWN     PixelFormat = 0
-	PIXELFORMAT_INDEX1LSB               = 286261504
-	PIXELFORMAT_INDEX1MSB               = 287310080
-	PIXELFORMAT_INDEX4LSB               = 303039488
-	PIXELFORMAT_INDEX4MSB               = 304088064
-	PIXELFORMAT_INDEX8                  = 318769153
-	PIXELFORMAT_RGB332                  = 336660481
-	PIXELFORMAT_RGB444                  = 353504258
-	PIXELFORMAT_RGB555                  = 353570562
-	PIXELFORMAT_BGR555                  = 357764866
-	PIXELFORMAT_ARGB4444                = 355602434
-	PIXELFORMAT_RGBA4444                = 356651010
-	PIXELFORMAT_ABGR4444                = 359796738
-	PIXELFORMAT_BGRA4444                = 360845314
-	PIXELFORMAT_ARGB1555                = 355667970
-	PIXELFORMAT_RGBA5551                = 356782082
-	PIXELFORMAT_ABGR1555                = 359862274
-	PIXELFORMAT_BGRA5551                = 360976386
-	PIXELFORMAT_RGB565                  = 353701890
-	PIXELFORMAT_BGR565                  = 357896194
-	PIXELFORMAT_RGB24                   = 386930691
-	PIXELFORMAT_BGR24                   = 390076419
-	PIXELFORMAT_RGB888                  = 370546692
-	PIXELFORMAT_RGBX8888                = 371595268
-	PIXELFORMAT_BGR888                  = 374740996
-	PIXELFORMAT_BGRX8888                = 375789572
-	PIXELFORMAT_ARGB8888                = 372645892
-	PIXELFORMAT_RGBA8888                = 373694468
-	PIXELFORMAT_ABGR8888                = 376840196
-	PIXELFORMAT_BGRA8888                = 377888772
-	PIXELFORMAT_ARGB2101010             = 372711428
-	PIXELFORMAT_YV12                    = 842094169
-	PIXELFORMAT_IYUV                    = 1448433993
-	PIXELFORMAT_YUY2                    = 844715353
-	PIXELFORMAT_UYVY                    = 1498831189
-	PIXELFORMAT_YVYU                    = 1431918169
+	PixelFormatUnknown     PixelFormat = PixelFormat(C.SDL_PIXELFORMAT_UNKNOWN)
+	PixelFormatIndex1LSB               = PixelFormat(C.SDL_PIXELFORMAT_INDEX1LSB)
+	PixelFormatIndex1MSB               = PixelFormat(C.SDL_PIXELFORMAT_INDEX1MSB)
+	PixelFormatIndex4LSB               = PixelFormat(C.SDL_PIXELFORMAT_INDEX4LSB)
+	PixelFormatIndex4MSB               = PixelFormat(C.SDL_PIXELFORMAT_INDEX4MSB)
+	PixelFormatIndex8                  = PixelFormat(C.SDL_PIXELFORMAT_INDEX8)
+	PixelFormatRGB332                  = PixelFormat(C.SDL_PIXELFORMAT_RGB332)
+	PixelFormatRGB444                  = PixelFormat(C.SDL_PIXELFORMAT_RGB444)
+	PixelFormatRGB555                  = PixelFormat(C.SDL_PIXELFORMAT_RGB555)
+	PixelFormatBGR555                  = PixelFormat(C.SDL_PIXELFORMAT_BGR555)
+	PixelFormatARGB4444                = PixelFormat(C.SDL_PIXELFORMAT_ARGB4444)
+	PixelFormatRGBA4444                = PixelFormat(C.SDL_PIXELFORMAT_RGBA4444)
+	PixelFormatABGR4444                = PixelFormat(C.SDL_PIXELFORMAT_ABGR4444)
+	PixelFormatBGRA4444                = PixelFormat(C.SDL_PIXELFORMAT_BGRA4444)
+	PixelFormatARGB1555                = PixelFormat(C.SDL_PIXELFORMAT_ARGB1555)
+	PixelFormatRGBA5551                = PixelFormat(C.SDL_PIXELFORMAT_RGBA5551)
+	PixelFormatABGR1555                = PixelFormat(C.SDL_PIXELFORMAT_ABGR1555)
+	PixelFormatBGRA5551                = PixelFormat(C.SDL_PIXELFORMAT_BGRA5551)
+	PixelFormatRGB565                  = PixelFormat(C.SDL_PIXELFORMAT_RGB565)
+	PixelFormatBGR565                  = PixelFormat(C.SDL_PIXELFORMAT_BGR565)
+	PixelFormatRGB24                   = PixelFormat(C.SDL_PIXELFORMAT_RGB24)
+	PixelFormatBGR24                   = PixelFormat(C.SDL_PIXELFORMAT_BGR24)
+	PixelFormatRGB888                  = PixelFormat(C.SDL_PIXELFORMAT_RGB888)
+	PixelFormatRGBX8888                = PixelFormat(C.SDL_PIXELFORMAT_RGBX8888)
+	PixelFormatBGR888                  = PixelFormat(C.SDL_PIXELFORMAT_BGR888)
+	PixelFormatBGRX8888                = PixelFormat(C.SDL_PIXELFORMAT_BGRX8888)
+	PixelFormatARGB8888                = PixelFormat(C.SDL_PIXELFORMAT_ARGB8888)
+	PixelFormatRGBA8888                = PixelFormat(C.SDL_PIXELFORMAT_RGBA8888)
+	PixelFormatABGR8888                = PixelFormat(C.SDL_PIXELFORMAT_ABGR8888)
+	PixelFormatBGRA8888                = PixelFormat(C.SDL_PIXELFORMAT_BGRA8888)
+	PixelFormatARGB2101010             = PixelFormat(C.SDL_PIXELFORMAT_ARGB2101010)
+	PixelFormatYV12                    = PixelFormat(C.SDL_PIXELFORMAT_YV12)
+	PixelFormatIYUV                    = PixelFormat(C.SDL_PIXELFORMAT_IYUV)
+	PixelFormatYUY2                    = PixelFormat(C.SDL_PIXELFORMAT_YUY2)
+	PixelFormatUYVY                    = PixelFormat(C.SDL_PIXELFORMAT_UYVY)
+	PixelFormatYVYU                    = PixelFormat(C.SDL_PIXELFORMAT_YVYU)
 )
 
 // END Pixel Info }}}1
