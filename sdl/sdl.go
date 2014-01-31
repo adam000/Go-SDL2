@@ -19,15 +19,16 @@ import (
 type InitFlag uint32
 
 const (
-	INIT_TIMER          InitFlag = 0x00000001
-	INIT_AUDIO                   = 0x00000010
-	INIT_VIDEO                   = 0x00000020 // INIT_VIDEO implies INIT_EVENTS 
-	INIT_JOYSTICK                = 0x00000200 // INIT_JOYSTICK implies INIT_EVENTS 
-	INIT_HAPTIC                  = 0x00001000
-	INIT_GAMECONTROLLER          = 0x00002000 // INIT_GAMECONTROLLER implies INIT_JOYSTICK
-	INIT_EVENTS                  = 0x00004000
-	INIT_NOPARACHUTE             = 0x00100000 // Don't catch fatal signals
-	INIT_EVERYTHING              = 0x00107231 // This should be the sum of all the other flags
+	InitTimer          InitFlag = 0x00000001
+	InitAudio                   = 0x00000010
+	InitVideo                   = 0x00000020 // InitVideo implies InitEvents
+	InitJoystick                = 0x00000200 // InitJoystick implies InitEvents
+	InitHaptic                  = 0x00001000
+	InitGameController          = 0x00002000 // InitGameController implies InitJoystick
+	InitEvents                  = 0x00004000
+	InitNoParachute             = 0x00100000 // Don't catch fatal signals
+	InitEverything              = InitTimer | InitAudio | InitVideo | InitJoystick | InitHaptic |
+		InitGameController | InitEvents | InitNoParachute
 )
 
 // Initialize SDL and subsystems
@@ -58,25 +59,25 @@ func getError() error {
 type WindowFlag uint32
 
 const (
-	WINDOW_FULLSCREEN WindowFlag = 1 << iota
-	WINDOW_OPENGL
-	WINDOW_SHOWN
-	WINDOW_HIDDEN
-	WINDOW_BORDERLESS
-	WINDOW_RESIZABLE
-	WINDOW_MINIMIZED
-	WINDOW_MAXIMIZED
-	WINDOW_INPUT_GRABBED
-	WINDOW_INPUT_FOCUS
-	WINDOW_MOUSE_FOCUS
-	WINDOW_FOREIGN
+	WindowFullscreen WindowFlag = 1 << iota
+	WindowOpenGL
+	WindowShown
+	WindowHidden
+	WindowBorderless
+	WindowResizable
+	WindowMinimized
+	WindowMaximized
+	WindowInputGrabbed
+	WindowInputFocus
+	WindowMouseFocus
+	WindowForeign
 	_
-	WINDOW_ALLOW_HIGHDPI
-	WINDOW_FULLSCREEN_DESKTOP = 0x00001001
+	WindowAllowHighDpi
+	WindowFullscreenDesktop = 0x00001001
 )
 
-const WINDOWPOS_UNDEFINED = 0x1FFF0000
-const WINDOWPOS_CENTERED =   0x2FFF0000
+const WindowPosUndefined = 0x1FFF0000
+const WindowPosCentered = 0x2FFF0000
 
 type Window struct {
 	w *C.SDL_Window

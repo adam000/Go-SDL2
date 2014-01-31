@@ -24,66 +24,66 @@ type Surface struct {
 type PixelType uint32
 
 const (
-	PIXELTYPE_UNKNOWN PixelType = iota
-	PIXELTYPE_INDEX1
-	PIXELTYPE_INDEX4
-	PIXELTYPE_INDEX8
-	PIXELTYPE_PACKED8
-	PIXELTYPE_PACKED16
-	PIXELTYPE_PACKED32
-	PIXELTYPE_ARRAYU8
-	PIXELTYPE_ARRAYU16
-	PIXELTYPE_ARRAYU32
-	PIXELTYPE_ARRAYF16
-	PIXELTYPE_ARRAYF32
+	PixelTypeUnknown PixelType = iota
+	PixelTypeIndex1
+	PixelTypeIndex4
+	PixelTypeIndex8
+	PixelTypePacked8
+	PixelTypePacked16
+	PixelTypePacked32
+	PixelTypeArrayU8
+	PixelTypeArrayU16
+	PixelTypeArrayU32
+	PixelTypeArrayF16
+	PixelTypeArrayF32
 )
 
 type PixelOrder uint32
 
 // Bitmap pixel order, high bit -> low bit.
 const (
-	BITMAPORDER_NONE PixelOrder = iota
-	BITMAPORDER_4321
-	BITMAPORDER_1234
+	BitmapOrderNone PixelOrder = iota
+	BitmapOrder4321
+	BitmapOrder1234
 )
 
 // Packed component order, high bit -> low bit.
 const (
-	PACKEDORDER_NONE PixelOrder = iota
-	PACKEDORDER_XRGB
-	PACKEDORDER_RGBX
-	PACKEDORDER_ARGB
-	PACKEDORDER_RGBA
-	PACKEDORDER_XBGR
-	PACKEDORDER_BGRX
-	PACKEDORDER_ABGR
-	PACKEDORDER_BGRA
+	PackedOrderNone PixelOrder = iota
+	PackedOrderXRGB
+	PackedOrderRGBX
+	PackedOrderARGB
+	PackedOrderRGBA
+	PackedOrderXBGR
+	PackedOrderBGRX
+	PackedOrderABGR
+	PackedOrderBGRA
 )
 
 // Array component order, low byte -> high byte.
 const (
-	ARRAYORDER_NONE PixelOrder = iota
-	ARRAYORDER_RGB
-	ARRAYORDER_RGBA
-	ARRAYORDER_ARGB
-	ARRAYORDER_BGR
-	ARRAYORDER_BGRA
-	ARRAYORDER_ABGR
+	ArrayOrderNone PixelOrder = iota
+	ArrayOrderRGB
+	ArrayOrderRGBA
+	ArrayOrderARGB
+	ArrayOrderBGR
+	ArrayOrderBGRA
+	ArrayOrderABGR
 )
 
 type PackedLayout uint32
 
 // Packed component layout.
 const (
-	PACKEDLAYOUT_NONE PackedLayout = iota
-	PACKEDLAYOUT_332
-	PACKEDLAYOUT_4444
-	PACKEDLAYOUT_1555
-	PACKEDLAYOUT_5551
-	PACKEDLAYOUT_565
-	PACKEDLAYOUT_8888
-	PACKEDLAYOUT_2101010
-	PACKEDLAYOUT_1010102
+	PackedLayoutNone PackedLayout = iota
+	PackedLayout332
+	PackedLayout4444
+	PackedLayout1555
+	PackedLayout5551
+	PackedLayout565
+	PackedLayout8888
+	PackedLayout2101010
+	PackedLayout1010102
 )
 
 func DEFINE_PIXELFOURCC(A, B, C, D uint32) PixelFormat {
@@ -127,18 +127,18 @@ func BYTESPERPIXEL(X PixelFormat) PixelFormat {
 func ISPIXELFORMAT_INDEXED(format PixelFormat) bool {
 	pixelType := PIXELTYPE(format)
 	return !ISPIXELFORMAT_FOURCC(format) &&
-		((pixelType == PIXELTYPE_INDEX1) ||
-			(pixelType == PIXELTYPE_INDEX4) ||
-			(pixelType == PIXELTYPE_INDEX8))
+		((pixelType == PixelTypeIndex1) ||
+			(pixelType == PixelTypeIndex4) ||
+			(pixelType == PixelTypeIndex8))
 }
 
 func ISPIXELFORMAT_ALPHA(format PixelFormat) bool {
 	pixelOrder := PIXELORDER(format)
 	return !ISPIXELFORMAT_FOURCC(format) &&
-		((pixelOrder == PACKEDORDER_ARGB) ||
-			(pixelOrder == PACKEDORDER_RGBA) ||
-			(pixelOrder == PACKEDORDER_ABGR) ||
-			(pixelOrder == PACKEDORDER_BGRA))
+		((pixelOrder == PackedOrderARGB) ||
+			(pixelOrder == PackedOrderRGBA) ||
+			(pixelOrder == PackedOrderABGR) ||
+			(pixelOrder == PackedOrderBGRA))
 }
 
 // The flag is set to 1 because 0x1? is not in the printable ASCII range
