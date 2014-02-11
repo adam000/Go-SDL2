@@ -35,6 +35,15 @@ type renderer struct {
 	r *C.SDL_Renderer
 }
 
+type RendererFlags uint32
+
+const (
+	RendererSoftware = 1 << iota
+	RendererAccelerated
+	RendererPresentVsync
+	RendererTargetTexture
+)
+
 type Window struct {
 	w        *C.SDL_Window
 	Renderer *renderer
