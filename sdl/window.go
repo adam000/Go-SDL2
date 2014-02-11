@@ -7,8 +7,8 @@ package sdl
 import "C"
 
 import (
-	"unsafe"
 	"reflect"
+	"unsafe"
 )
 
 // Window Handling
@@ -52,16 +52,16 @@ const (
 const TextureFormatsSize int = 16
 
 type RendererInfo struct {
-	Name string
-	Flags RendererFlags
+	Name              string
+	Flags             RendererFlags
 	NumTextureFormats uint32
-	TextureFormats []PixelFormat
-	MaxTextureWidth int
-	MaxTextureHeight int
+	TextureFormats    []PixelFormat
+	MaxTextureWidth   int
+	MaxTextureHeight  int
 }
 
 type Window struct {
-	w        *C.SDL_Window
+	w *C.SDL_Window
 	r *Renderer
 }
 
@@ -77,17 +77,17 @@ func NewWindow(title string, x, y, w, h int, flags WindowFlag) (Window, error) {
 }
 
 // Get the window's surface
-func (w *Window) GetSurface() Surface {
+func (w Window) GetSurface() Surface {
 	return Surface{C.SDL_GetWindowSurface(w.w)}
 }
 
-func (w *Window) Destroy() {
+func (w Window) Destroy() {
 	C.SDL_DestroyWindow(w.w)
 }
 
 // Renderer functions
 
-func NewRenderer(window *Window, index int, flags uint32) (Renderer, error) {
+func NewRenderer(window Window, index int, flags uint32) (Renderer, error) {
 	if r := C.SDL_CreateRenderer(window.w, C.int(index), C.Uint32(flags)); r != nil {
 		return Renderer{r}, nil
 	}
@@ -95,7 +95,7 @@ func NewRenderer(window *Window, index int, flags uint32) (Renderer, error) {
 	return Renderer{}, getError()
 }
 
-func (w *Window) GetRenderer() (Renderer, error) {
+func (w Window) GetRenderer() (Renderer, error) {
 	if r := C.SDL_GetRenderer(w.w); r != nil {
 		return Renderer{r}, nil
 	}
@@ -103,7 +103,7 @@ func (w *Window) GetRenderer() (Renderer, error) {
 	return Renderer{}, getError()
 }
 
-func (r *Renderer) GetRendererInfo() (i *RendererInfo, e error) {
+func (r Renderer) GetRendererInfo() (i *RendererInfo, e error) {
 	var info C.SDL_RendererInfo
 	if retCode := C.SDL_GetRendererInfo(r.r, &info); retCode != 0 {
 		return &RendererInfo{}, getError()
@@ -120,7 +120,6 @@ func (r *Renderer) GetRendererInfo() (i *RendererInfo, e error) {
 		int(info.max_texture_height)}, nil
 }
 
-
-func (r *Renderer) Destroy() {
+func (r Renderer) Destroy() {
 	C.SDL_DestroyRenderer(r.r)
 }
