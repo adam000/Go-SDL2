@@ -144,7 +144,7 @@ func convertEvent(cEvent *C.SDL_Event) (ev Event) {
 	case KEYDOWN, KEYUP, TEXTEDITING, TEXTINPUT:
 		return KeyboardEvent{*C.ConvertToKeyboardEvent(cEvent)}
 	default:
-		fmt.Printf("Unhandled event with int: %d\n", int(C.GetType(cEvent)));
+		fmt.Printf("Unhandled event with int: %d\n", int(C.GetType(cEvent)))
 		return nil
 	}
 }
@@ -287,4 +287,3 @@ type DollarGestureEvent struct {
 type DropEvent struct {
 	ev C.SDL_DropEvent
 }
-
