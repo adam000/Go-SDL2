@@ -23,6 +23,7 @@ type Surface struct {
 
 type PixelType uint32
 
+// TODO assign from C #defines
 const (
 	PixelTypeUnknown PixelType = iota
 	PixelTypeIndex1
@@ -86,6 +87,7 @@ const (
 	PackedLayout1010102
 )
 
+// TODO wrap these to their C macros
 func DEFINE_PIXELFOURCC(A, B, C, D uint32) PixelFormat {
 	return PixelFormat((A << 0) | (B << 8) | (C << 16) | (D << 24))
 }

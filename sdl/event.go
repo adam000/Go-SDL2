@@ -31,6 +31,8 @@ import (
 
 // START EventType {{{1
 
+// TODO put all these consts in 1 block and assign them to their C #define equivalents.
+// And suffix with Event instead of Ev
 type EventType uint16
 
 const (
