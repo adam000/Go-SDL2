@@ -9,14 +9,14 @@ import "C"
 
 import "unsafe"
 
-func LoadImage(fileName string) (*Surface, error) {
+func LoadImage(fileName string) (Surface, error) {
 	cName := C.CString(fileName)
 	surf := C.IMG_Load(cName)
 	C.free(unsafe.Pointer(cName))
 
 	if surf == nil {
-		return &Surface{}, getError()
+		return Surface{}, getError()
 	}
 
-	return &Surface{surf}, nil
+	return Surface{surf}, nil
 }
