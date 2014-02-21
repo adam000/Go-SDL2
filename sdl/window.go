@@ -11,6 +11,10 @@ import (
 	"unsafe"
 )
 
+//////////////////////////////////////////
+// Contains Window and Renderer methods /
+////////////////////////////////////////
+
 // Window Handling
 
 type WindowFlag uint32
@@ -122,4 +126,33 @@ func (r Renderer) GetRendererInfo() (i *RendererInfo, e error) {
 
 func (r Renderer) Destroy() {
 	C.SDL_DestroyRenderer(r.r)
+}
+
+// SDL_RenderCopy
+func (r Renderer) CopyTexture(texture Texture, srcRect *Rect, destRect *Rect) error {
+	var src *C.SDL_Rect
+	var dest *C.SDL_Rect
+	if srcRect != nil {
+		src = srcRect.toCRect()
+	}
+	if destRect != nil {
+		dest = destRect.toCRect()
+	}
+
+	if C.SDL_RenderCopy(r.r, texture.t, src, dest) != 0 {
+		return getError()
+	}
+	return nil
+}
+
+// SDL_RenderClear
+func (r Renderer) Clear() error {
+	if retCode := C.SDL_RenderClear(r.r); retCode != 0 {
+		return getError()
+	}
+	return nil
+}
+
+func (r Renderer) Present() {
+	C.SDL_RenderPresent(r.r)
 }
