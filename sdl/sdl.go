@@ -1,7 +1,4 @@
-/*
-A binding of SDL2 and SDL2_image with an object-oriented twist
-*/
-
+// Package sdl provides a binding of SDL2 and SDL2_image with an object-oriented twist.
 package sdl
 
 // #cgo pkg-config: sdl2
@@ -10,42 +7,54 @@ package sdl
 // #include "SDL.h"
 import "C"
 
-// General
-
+// An InitFlag represents a set of SDL subsystems to initialize.
 type InitFlag uint32
 
+// InitFlag masks.
 const (
-	InitTimer          InitFlag = 0x00000001
-	InitAudio                   = 0x00000010
-	InitVideo                   = 0x00000020 // InitVideo implies InitEvents
-	InitJoystick                = 0x00000200 // InitJoystick implies InitEvents
-	InitHaptic                  = 0x00001000
-	InitGameController          = 0x00002000 // InitGameController implies InitJoystick
-	InitEvents                  = 0x00004000
-	InitNoParachute             = 0x00100000 // Don't catch fatal signals
-	InitEverything              = InitTimer | InitAudio | InitVideo | InitJoystick | InitHaptic |
-		InitGameController | InitEvents | InitNoParachute
+	InitTimer          InitFlag = C.SDL_INIT_TIMER
+	InitAudio          InitFlag = C.SDL_INIT_AUDIO
+	InitVideo          InitFlag = C.SDL_INIT_VIDEO    // InitVideo implies InitEvents
+	InitJoystick       InitFlag = C.SDL_INIT_JOYSTICK // InitJoystick implies InitEvents
+	InitHaptic         InitFlag = C.SDL_INIT_HAPTIC
+	InitGameController InitFlag = C.SDL_INIT_GAMECONTROLLER // InitGameController implies InitJoystick
+	InitEvents         InitFlag = C.SDL_INIT_EVENTS
+	InitNoParachute    InitFlag = C.SDL_INIT_NOPARACHUTE // Don't catch fatal signals
+
+	InitEverything InitFlag = C.SDL_INIT_EVERYTHING
 )
 
-// Initialize SDL and subsystems
-func Init(flags InitFlag) int {
-	return int(C.SDL_Init(C.Uint32(flags)))
+// Init initializes SDL and its subsystems.  Multiple flags will be ORed together.
+// Init must be called before calling other functions in this package.
+func Init(flags ...InitFlag) error {
+	var f InitFlag
+	for i := range flags {
+		f |= flags[i]
+	}
+	if C.SDL_Init(C.Uint32(f)) != 0 {
+		return getError()
+	}
+	return nil
 }
 
-// Clean up for SDL
+// Quit cleans up SDL.
 func Quit() {
 	C.SDL_Quit()
 }
 
-// Error Handling
-
+// Error stores an SDL error.
 type Error string
 
 func (e Error) Error() string {
-	return string(e)
+	return "sdl: " + string(e)
 }
 
+// getError returns the current SDL error as a Go error value.
 func getError() error {
-	// TODO(light): check for empty string?
-	return Error(C.GoString(C.SDL_GetError()))
+	e := C.SDL_GetError()
+	if *e == 0 {
+		// empty string, no error.
+		return nil
+	}
+	return Error(C.GoString(e))
 }
