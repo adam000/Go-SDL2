@@ -23,6 +23,7 @@ type Surface struct {
 
 type PixelType uint32
 
+// TODO assign from C #defines
 const (
 	PixelTypeUnknown PixelType = iota
 	PixelTypeIndex1
@@ -86,6 +87,7 @@ const (
 	PackedLayout1010102
 )
 
+// TODO wrap these to their C macros
 func DEFINE_PIXELFOURCC(A, B, C, D uint32) PixelFormat {
 	return PixelFormat((A << 0) | (B << 8) | (C << 16) | (D << 24))
 }
@@ -194,6 +196,19 @@ func (surface Surface) PixelData() (PixelData, error) {
 		return PixelData{}, getError()
 	}
 	return PixelData{s: surface.s}, nil
+}
+
+// SDL_CreateTextureFromSurface
+func (surface Surface) ToTexture(renderer Renderer) (Texture, error) {
+	txt := C.SDL_CreateTextureFromSurface(renderer.r, surface.s)
+	if txt == nil {
+		return Texture{}, getError()
+	}
+	return Texture{txt}, nil
+}
+
+func (surface Surface) Free() {
+	C.SDL_FreeSurface(surface.s)
 }
 
 // Implements the image.Image and draw.Image interfaces
