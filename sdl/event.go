@@ -25,6 +25,10 @@ import (
 	"unsafe"
 )
 
+//
+// The only way to keep this file sane is with vim folds. `:help fold` for more info
+//
+
 // START EventType {{{1
 
 type EventType uint16
@@ -150,16 +154,23 @@ func convertEvent(cEvent *C.SDL_Event) (ev Event) {
 	}
 }
 
+// {{{1 Event Structs
+
+// {{{2 CommonEvent
 // TODO make this implement Event
 type CommonEvent struct {
 	ev C.SDL_CommonEvent
 }
+// }}}2 CommonEvent
 
+// {{{2 WindowEvent
 // TODO make this implement Event
 type WindowEvent struct {
 	ev C.SDL_WindowEvent
 }
+// }}}2 WindowEvent
 
+// {{{2 KeyboardEvent
 type KeyboardEvent struct {
 	e *C.SDL_KeyboardEvent
 }
@@ -190,72 +201,100 @@ func (e KeyboardEvent) Repeat() uint8 {
 func (e KeyboardEvent) Keysym() Keysym {
 }
 */
+// }}}2 KeyboardEvent
 
+// {{{2 TextEditingEvent
 // TODO make this implement Event
 type TextEditingEvent struct {
 	ev C.SDL_TextEditingEvent
 }
+// }}}2 TextEditingEvent
 
+// {{{2 TextInputEvent
 // TODO make this implement Event
 type TextInputEvent struct {
 	ev C.SDL_TextInputEvent
 }
+// }}}2 TextInputEvent
 
+// {{{2 MouseMotionEvent
 // TODO make this implement Event
 type MouseMotionEvent struct {
 	ev C.SDL_MouseMotionEvent
 }
+// }}}2 MouseMotionEvent
 
+// {{{2 MouseButtonEvent
 // TODO make this implement Event
 type MouseButtonEvent struct {
 	ev C.SDL_MouseButtonEvent
 }
+// }}}2 MouseButtonEvent
 
+// {{{2 MouseWheelEvent
 // TODO make this implement Event
 type MouseWheelEvent struct {
 	ev C.SDL_MouseWheelEvent
 }
+// }}}2 MouseWheelEvent
 
+// {{{2 JoyAxisEvent
 // TODO make this implement Event
 type JoyAxisEvent struct {
 	ev C.SDL_JoyAxisEvent
 }
+// }}}2 JoyAxisEvent
 
+// {{{2 JoyBallEvent
 // TODO make this implement Event
 type JoyBallEvent struct {
 	ev C.SDL_JoyBallEvent
 }
+// }}}2 JoyBallEvent
 
+// {{{2 JoyHatEvent
 // TODO make this implement Event
 type JoyHatEvent struct {
 	ev C.SDL_JoyHatEvent
 }
+// }}}2 JoyHatEvent
 
+// {{{2 JoyButtonEvent
 // TODO make this implement Event
 type JoyButtonEvent struct {
 	ev C.SDL_JoyButtonEvent
 }
+// }}}2 JoyButtonEvent
 
+// {{{2 JoyDeviceEvent
 // TODO make this implement Event
 type JoyDeviceEvent struct {
 	ev C.SDL_JoyDeviceEvent
 }
+// }}}2 JoyDeviceEvent
 
+// {{{2 ControllerAxisEvent
 // TODO make this implement Event
 type ControllerAxisEvent struct {
 	ev C.SDL_ControllerAxisEvent
 }
+// }}}2 ControllerAxisEvent
 
+// {{{2 ControllerButtonEvent
 // TODO make this implement Event
 type ControllerButtonEvent struct {
 	ev C.SDL_ControllerButtonEvent
 }
+// }}}2 ControllerButtonEvent
 
+// {{{2 ControllerDeviceEvent
 // TODO make this implement Event
 type ControllerDeviceEvent struct {
 	ev C.SDL_ControllerDeviceEvent
 }
+// }}}2 ControllerDeviceEvent
 
+// {{{2 QuitEvent
 type QuitEvent struct {
 	e *C.SDL_QuitEvent
 }
@@ -267,33 +306,48 @@ func (e QuitEvent) Timestamp() uint32 {
 func (e QuitEvent) Type() EventType {
 	return QuitEv
 }
+// }}}2 QuitEvent
 
+// {{{2 UserEvent
 // TODO make this implement Event
 type UserEvent struct {
 	ev C.SDL_UserEvent
 }
+// }}}2 UserEvent
 
+// {{{2 SysWMEvent
 // TODO make this implement Event
 type SysWMEvent struct {
 	ev C.SDL_SysWMEvent
 }
+// }}}2 SysWMEvent
 
+// {{{2 TouchFingerEvent
 // TODO make this implement Event
 type TouchFingerEvent struct {
 	ev C.SDL_TouchFingerEvent
 }
+// }}}2 TouchFingerEvent
 
+// {{{2 MultiGestureEvent
 // TODO make this implement Event
 type MultiGestureEvent struct {
 	ev C.SDL_MultiGestureEvent
 }
+// }}}2 MultiGestureEvent
 
+// {{{2 DollarGestureEvent
 // TODO make this implement Event
 type DollarGestureEvent struct {
 	ev C.SDL_DollarGestureEvent
 }
+// }}}2 DollarGestureEvent
 
+// {{{2 DropEvent
 // TODO make this implement Event
 type DropEvent struct {
 	ev C.SDL_DropEvent
 }
+// }}}2 DropEvent
+
+// }}}1 Event Structs
