@@ -196,6 +196,19 @@ func (surface Surface) PixelData() (PixelData, error) {
 	return PixelData{s: surface.s}, nil
 }
 
+// SDL_CreateTextureFromSurface
+func (surface Surface) ToTexture(renderer Renderer) (Texture, error) {
+	txt := C.SDL_CreateTextureFromSurface(renderer.r, surface.s)
+	if txt == nil {
+		return Texture{}, getError()
+	}
+	return Texture{txt}, nil
+}
+
+func (surface Surface) Free() {
+	C.SDL_FreeSurface(surface.s)
+}
+
 // Implements the image.Image and draw.Image interfaces
 // See: http://golang.org/pkg/image/#Image http://golang.org/pkg/image/draw/#Image
 type PixelData struct {
