@@ -1,9 +1,10 @@
-Go-SDL2 is my attempt to make Go bindings for SDL version 2, known as "SDL2".
+Go-SDL2 is a collection of packages for Go bindings for the
+[Simple DirectMedia Layer](http://libsdl.org) version 2, known as "SDL2".
 
-I'm using this for a (privately hosted) project of my own, so I'll be adding to
-the bindings as needed.
+These bindings aim to be very Go-idiomatic and intuitive, and will include
+bindings for SDL packages such as SDL-ttf, SDL-image, and more.
 
-Huge thanks to Ross Light for assisting me with questions and problems I had
-with this project.
+Examples of how to use these packages are available
+[here](https://github.com/adam000/go-sdl-gl-examples).
 
 *This software is provided free of charge. See LICENSE for details.*
