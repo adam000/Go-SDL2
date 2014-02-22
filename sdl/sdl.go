@@ -49,8 +49,10 @@ func (e Error) Error() string {
 	return "sdl: " + string(e)
 }
 
-// getError returns the current SDL error as a Go error value.
-func getError() error {
+// GetError returns the current SDL error as a Go error value.
+// This is internal to SDL but exported because it is cross-package.
+func GetError() error {
+	// TODO(light): synchronize access?
 	e := C.SDL_GetError()
 	if *e == 0 {
 		// empty string, no error.
