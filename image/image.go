@@ -1,13 +1,16 @@
-package sdl
+// Package image provides access to popular image formats via SDL_image.
+package image
 
 // #cgo pkg-config: sdl2
 // #cgo LDFLAGS: -lSDL2_image
 //
-// #include "SDL.h"
-//	#include "SDL_image.h"
+// #include "SDL_image.h"
 import "C"
 
 import "unsafe"
+
+func Init() {
+}
 
 func LoadImage(fileName string) (Surface, error) {
 	cName := C.CString(fileName)
