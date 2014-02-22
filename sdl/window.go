@@ -6,11 +6,6 @@ package sdl
 // #include "SDL.h"
 import "C"
 
-import (
-	"reflect"
-	"unsafe"
-)
-
 //////////////////////////////////////////
 // Contains Window and Renderer methods /
 ////////////////////////////////////////
@@ -56,12 +51,11 @@ const (
 const TextureFormatsSize int = 16
 
 type RendererInfo struct {
-	Name              string
-	Flags             RendererFlags
-	NumTextureFormats uint32
-	TextureFormats    []PixelFormatEnum
-	MaxTextureWidth   int
-	MaxTextureHeight  int
+	Name             string
+	Flags            RendererFlags
+	TextureFormats   []PixelFormatEnum
+	MaxTextureWidth  int
+	MaxTextureHeight int
 }
 
 type Window struct {
@@ -99,29 +93,31 @@ func NewRenderer(window Window, index int, flags uint32) (Renderer, error) {
 	return Renderer{}, getError()
 }
 
-func (w Window) GetRenderer() (Renderer, error) {
-	if r := C.SDL_GetRenderer(w.w); r != nil {
-		return Renderer{r}, nil
+func (w Window) Renderer() (Renderer, error) {
+	r := C.SDL_GetRenderer(w.w)
+	if r == nil {
+		return Renderer{}, getError()
 	}
-
-	return Renderer{}, getError()
+	return Renderer{r}, nil
 }
 
-func (r Renderer) GetRendererInfo() (i *RendererInfo, e error) {
+func (r Renderer) Info() (*RendererInfo, error) {
 	var info C.SDL_RendererInfo
-	if retCode := C.SDL_GetRendererInfo(r.r, &info); retCode != 0 {
-		return &RendererInfo{}, getError()
+	if C.SDL_GetRendererInfo(r.r, &info) != 0 {
+		return nil, getError()
 	}
 
-	var textureFormats []PixelFormatEnum
-	sliceHeader := (*reflect.SliceHeader)((unsafe.Pointer(&textureFormats)))
-	sliceHeader.Cap = TextureFormatsSize
-	sliceHeader.Len = TextureFormatsSize
-	sliceHeader.Data = uintptr(unsafe.Pointer(&info.texture_formats[0]))
-
-	return &RendererInfo{C.GoString(info.name), RendererFlags(info.flags),
-		uint32(info.num_texture_formats), textureFormats, int(info.max_texture_width),
-		int(info.max_texture_height)}, nil
+	formats := make([]PixelFormatEnum, info.num_texture_formats)
+	for i := range formats {
+		formats[i] = PixelFormatEnum(info.texture_formats[i])
+	}
+	return &RendererInfo{
+		Name:             C.GoString(info.name),
+		Flags:            RendererFlags(info.flags),
+		TextureFormats:   formats,
+		MaxTextureWidth:  int(info.max_texture_width),
+		MaxTextureHeight: int(info.max_texture_height),
+	}, nil
 }
 
 func (r Renderer) Destroy() {
@@ -145,9 +141,9 @@ func (r Renderer) CopyTexture(texture Texture, srcRect *Rect, destRect *Rect) er
 	return nil
 }
 
-// SDL_RenderClear
+// Clear clears the current rendering target with the drawing color.
 func (r Renderer) Clear() error {
-	if retCode := C.SDL_RenderClear(r.r); retCode != 0 {
+	if C.SDL_RenderClear(r.r) != 0 {
 		return getError()
 	}
 	return nil
