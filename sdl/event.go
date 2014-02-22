@@ -11,6 +11,10 @@ package sdl
 //		return ev->type;
 // }
 //
+// SDL_CommonEvent* ConvertToCommonEvent(SDL_Event* ev) {
+//		return &ev->common;
+// }
+//
 // SDL_QuitEvent* ConvertToQuitEvent(SDL_Event* ev) {
 //		return &ev->quit;
 // }
@@ -130,38 +134,57 @@ const (
 
 // END EventType }}}1
 
+// Event is implemented by all SDL events.
 type Event interface {
-	Timestamp() uint32
+	// Type returns the event's type.
 	Type() EventType
+
+	// Timestamp returns the number of milliseconds since the SDL library initialization.
+	Timestamp() uint32
 }
 
-func PollEvent() (ev Event) {
+// PollEvent returns the next available event, or nil if there is no event pending.
+func PollEvent() Event {
 	var cEvent C.SDL_Event
-	if isEvent := C.SDL_PollEvent(&cEvent); isEvent == 0 {
+	if C.SDL_PollEvent(&cEvent) == 0 {
 		return nil
 	}
-
 	return convertEvent(&cEvent)
 }
 
+// HasEvent returns whether there is a pending event available.
+func HasEvent() bool {
+	return C.SDL_PollEvent(nil) != 0
+}
+
 func convertEvent(cEvent *C.SDL_Event) (ev Event) {
-	switch EventType(C.GetType(cEvent)) {
+	switch t := EventType(C.GetType(cEvent)); t {
 	case QuitEv:
 		return QuitEvent{C.ConvertToQuitEvent(cEvent)}
 	case KeyDownEv, KeyUpEv:
 		return KeyboardEvent{C.ConvertToKeyboardEvent(cEvent)}
 	default:
-		fmt.Printf("Unhandled event with int: %d\n", int(C.GetType(cEvent)))
-		return nil
+		fmt.Println("Unhandled event with int:", int(t))
+		return commonEvent{C.ConvertToCommonEvent(cEvent)}
 	}
 }
 
 // {{{1 Event Structs
 
 // {{{2 CommonEvent
-// TODO make this implement Event
-type CommonEvent struct {
-	ev C.SDL_CommonEvent
+
+// commonEvent holds fields common to all events.  It is not exported because it
+// doesn't provide anything useful outside of the Event interface.
+type commonEvent struct {
+	ev *C.SDL_CommonEvent
+}
+
+func (e commonEvent) Type() EventType {
+	return EventType(e.ev._type)
+}
+
+func (e commonEvent) Timestamp() uint32 {
+	return uint32(e.ev.timestamp)
 }
 
 // }}}2 CommonEvent
