@@ -2,8 +2,6 @@ package sdl
 
 // TODO put these C functions in their own event.c file
 
-// #cgo pkg-config: sdl2
-//
 // #include "SDL.h"
 //
 // Uint32 GetType(SDL_Event* ev) {

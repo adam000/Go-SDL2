@@ -1,7 +1,5 @@
 package sdl
 
-// #cgo pkg-config: sdl2
-//
 // #include "SDL.h"
 //
 // static Uint32 goSDL_pixelFlag(Uint32 pixelFormat) {
