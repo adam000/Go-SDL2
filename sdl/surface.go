@@ -4,6 +4,42 @@ package sdl
 // #cgo LDFLAGS: -lSDL2_image
 //
 // #include "SDL.h"
+//
+// Uint32 goSDL_pixelFlag(Uint32 pixelFormat) {
+//   return SDL_PIXELFLAG(pixelFormat);
+// }
+//
+// Uint32 goSDL_pixelType(Uint32 pixelFormat) {
+//   return SDL_PIXELTYPE(pixelFormat);
+// }
+//
+// Uint32 goSDL_pixelOrder(Uint32 pixelFormat) {
+//   return SDL_PIXELORDER(pixelFormat);
+// }
+//
+// Uint32 goSDL_pixelLayout(Uint32 pixelFormat) {
+//   return SDL_PIXELLAYOUT(pixelFormat);
+// }
+//
+// Uint32 goSDL_bitsPerPixel(Uint32 pixelFormat) {
+//   return SDL_BITSPERPIXEL(pixelFormat);
+// }
+//
+// Uint32 goSDL_bytesPerPixel(Uint32 pixelFormat) {
+//   return SDL_BYTESPERPIXEL(pixelFormat);
+// }
+//
+// Uint32 goSDL_isPixelFormatIndexed(Uint32 pixelFormat) {
+//   return SDL_ISPIXELFORMAT_INDEXED(pixelFormat);
+// }
+//
+// Uint32 goSDL_isPixelFormatAlpha(Uint32 pixelFormat) {
+//   return SDL_ISPIXELFORMAT_ALPHA(pixelFormat);
+// }
+//
+// Uint32 goSDL_isPixelFormatFourCC(Uint32 pixelFormat) {
+//   return SDL_ISPIXELFORMAT_FOURCC(pixelFormat);
+// }
 import "C"
 
 import (
@@ -18,25 +54,22 @@ type Surface struct {
 
 // BEGIN Pixel Info {{{1
 
-// The following helpers are modified directly from SDL 2.0 source code:
-// include/SDL_pixels.h
-
 type PixelType uint32
 
-// TODO assign from C #defines
+// Pixel types.
 const (
-	PixelTypeUnknown PixelType = iota
-	PixelTypeIndex1
-	PixelTypeIndex4
-	PixelTypeIndex8
-	PixelTypePacked8
-	PixelTypePacked16
-	PixelTypePacked32
-	PixelTypeArrayU8
-	PixelTypeArrayU16
-	PixelTypeArrayU32
-	PixelTypeArrayF16
-	PixelTypeArrayF32
+	PixelTypeUnknown  PixelType = C.SDL_PIXELTYPE_UNKNOWN
+	PixelTypeIndex1   PixelType = C.SDL_PIXELTYPE_INDEX1
+	PixelTypeIndex4   PixelType = C.SDL_PIXELTYPE_INDEX4
+	PixelTypeIndex8   PixelType = C.SDL_PIXELTYPE_INDEX8
+	PixelTypePacked8  PixelType = C.SDL_PIXELTYPE_PACKED8
+	PixelTypePacked16 PixelType = C.SDL_PIXELTYPE_PACKED16
+	PixelTypePacked32 PixelType = C.SDL_PIXELTYPE_PACKED32
+	PixelTypeArrayU8  PixelType = C.SDL_PIXELTYPE_ARRAYU8
+	PixelTypeArrayU16 PixelType = C.SDL_PIXELTYPE_ARRAYU16
+	PixelTypeArrayU32 PixelType = C.SDL_PIXELTYPE_ARRAYU32
+	PixelTypeArrayF16 PixelType = C.SDL_PIXELTYPE_ARRAYF16
+	PixelTypeArrayF32 PixelType = C.SDL_PIXELTYPE_ARRAYF32
 )
 
 type PixelOrder uint32
@@ -72,11 +105,11 @@ const (
 	ArrayOrderABGR
 )
 
-type PackedLayout uint32
+type PixelLayout uint32
 
 // Packed component layout.
 const (
-	PackedLayoutNone PackedLayout = iota
+	PackedLayoutNone PixelLayout = iota
 	PackedLayout332
 	PackedLayout4444
 	PackedLayout1555
@@ -87,106 +120,88 @@ const (
 	PackedLayout1010102
 )
 
-// TODO wrap these to their C macros
-func DEFINE_PIXELFOURCC(A, B, C, D uint32) PixelFormat {
-	return PixelFormat((A << 0) | (B << 8) | (C << 16) | (D << 24))
+// PixelFormatEnum describes the method of storing pixel data.
+type PixelFormatEnum uint32
+
+func (pf PixelFormatEnum) PixelType() PixelType {
+	return PixelType(C.goSDL_pixelType(C.Uint32(pf)))
 }
 
-func DEFINE_PIXELFORMAT(typ PixelType, order PixelOrder, layout PackedLayout, bits, bytes uint32) PixelFormat {
-	return PixelFormat((1 << 28) | uint32(typ<<24) | uint32(order<<20) | uint32(layout<<16) | uint32(bits<<8) | uint32(bytes<<0))
+func (pf PixelFormatEnum) PixelOrder() PixelOrder {
+	return PixelOrder(C.goSDL_pixelOrder(C.Uint32(pf)))
 }
 
-func PIXELFLAG(X PixelFormat) PixelFormat {
-	return (X >> 28) & 0x0F
+func (pf PixelFormatEnum) PixelLayout() PixelLayout {
+	return PixelLayout(C.goSDL_pixelLayout(C.Uint32(pf)))
 }
 
-func PIXELTYPE(X PixelFormat) PixelType {
-	return PixelType((X >> 24) & 0x0F)
+// BitsPerPixel returns the number of significant bits in a pixel value
+// stored in this format.
+func (pf PixelFormatEnum) BitsPerPixel() int {
+	return int(C.goSDL_bitsPerPixel(C.Uint32(pf)))
 }
 
-func PIXELORDER(X PixelFormat) PixelOrder {
-	return PixelOrder((X >> 20) & 0x0F)
+// BytesPerPixel returns the number of bytes required to hold a
+// pixel value stored in this format.
+func (pf PixelFormatEnum) BytesPerPixel() int {
+	return int(C.goSDL_bytesPerPixel(C.Uint32(pf)))
 }
 
-func PIXELLAYOUT(X PixelFormat) PackedLayout {
-	return PackedLayout((X >> 16) & 0x0F)
+// String returns the SDL constant name of the pixel format.
+func (pf PixelFormatEnum) String() string {
+	return C.GoString(C.SDL_GetPixelFormatName(C.Uint32(pf)))
 }
 
-func BITSPERPIXEL(X PixelFormat) uint32 {
-	return uint32(X>>8) & 0xFF
+func (pf PixelFormatEnum) IsIndexed() bool {
+	return C.goSDL_isPixelFormatIndexed(C.Uint32(pf)) != 0
 }
 
-func BYTESPERPIXEL(X PixelFormat) PixelFormat {
-	if ISPIXELFORMAT_FOURCC(X) {
-		if X == PixelFormatYUY2 || X == PixelFormatUYVY || X == PixelFormatYVYU {
-			return 2
-		}
-		return 1
-	}
-	return (X >> 0) & 0xFF
+func (pf PixelFormatEnum) IsAlpha() bool {
+	return C.goSDL_isPixelFormatAlpha(C.Uint32(pf)) != 0
 }
 
-func ISPIXELFORMAT_INDEXED(format PixelFormat) bool {
-	pixelType := PIXELTYPE(format)
-	return !ISPIXELFORMAT_FOURCC(format) &&
-		((pixelType == PixelTypeIndex1) ||
-			(pixelType == PixelTypeIndex4) ||
-			(pixelType == PixelTypeIndex8))
+func (pf PixelFormatEnum) IsFourCC() bool {
+	return C.goSDL_isPixelFormatFourCC(C.Uint32(pf)) != 0
 }
 
-func ISPIXELFORMAT_ALPHA(format PixelFormat) bool {
-	pixelOrder := PIXELORDER(format)
-	return !ISPIXELFORMAT_FOURCC(format) &&
-		((pixelOrder == PackedOrderARGB) ||
-			(pixelOrder == PackedOrderRGBA) ||
-			(pixelOrder == PackedOrderABGR) ||
-			(pixelOrder == PackedOrderBGRA))
-}
-
-// The flag is set to 1 because 0x1? is not in the printable ASCII range
-func ISPIXELFORMAT_FOURCC(format PixelFormat) bool {
-	return format != 0 && PIXELFLAG(format) != 1
-}
-
-type PixelFormat uint32
-
+// Defined pixel formats.
 const (
-	PixelFormatUnknown     PixelFormat = PixelFormat(C.SDL_PIXELFORMAT_UNKNOWN)
-	PixelFormatIndex1LSB               = PixelFormat(C.SDL_PIXELFORMAT_INDEX1LSB)
-	PixelFormatIndex1MSB               = PixelFormat(C.SDL_PIXELFORMAT_INDEX1MSB)
-	PixelFormatIndex4LSB               = PixelFormat(C.SDL_PIXELFORMAT_INDEX4LSB)
-	PixelFormatIndex4MSB               = PixelFormat(C.SDL_PIXELFORMAT_INDEX4MSB)
-	PixelFormatIndex8                  = PixelFormat(C.SDL_PIXELFORMAT_INDEX8)
-	PixelFormatRGB332                  = PixelFormat(C.SDL_PIXELFORMAT_RGB332)
-	PixelFormatRGB444                  = PixelFormat(C.SDL_PIXELFORMAT_RGB444)
-	PixelFormatRGB555                  = PixelFormat(C.SDL_PIXELFORMAT_RGB555)
-	PixelFormatBGR555                  = PixelFormat(C.SDL_PIXELFORMAT_BGR555)
-	PixelFormatARGB4444                = PixelFormat(C.SDL_PIXELFORMAT_ARGB4444)
-	PixelFormatRGBA4444                = PixelFormat(C.SDL_PIXELFORMAT_RGBA4444)
-	PixelFormatABGR4444                = PixelFormat(C.SDL_PIXELFORMAT_ABGR4444)
-	PixelFormatBGRA4444                = PixelFormat(C.SDL_PIXELFORMAT_BGRA4444)
-	PixelFormatARGB1555                = PixelFormat(C.SDL_PIXELFORMAT_ARGB1555)
-	PixelFormatRGBA5551                = PixelFormat(C.SDL_PIXELFORMAT_RGBA5551)
-	PixelFormatABGR1555                = PixelFormat(C.SDL_PIXELFORMAT_ABGR1555)
-	PixelFormatBGRA5551                = PixelFormat(C.SDL_PIXELFORMAT_BGRA5551)
-	PixelFormatRGB565                  = PixelFormat(C.SDL_PIXELFORMAT_RGB565)
-	PixelFormatBGR565                  = PixelFormat(C.SDL_PIXELFORMAT_BGR565)
-	PixelFormatRGB24                   = PixelFormat(C.SDL_PIXELFORMAT_RGB24)
-	PixelFormatBGR24                   = PixelFormat(C.SDL_PIXELFORMAT_BGR24)
-	PixelFormatRGB888                  = PixelFormat(C.SDL_PIXELFORMAT_RGB888)
-	PixelFormatRGBX8888                = PixelFormat(C.SDL_PIXELFORMAT_RGBX8888)
-	PixelFormatBGR888                  = PixelFormat(C.SDL_PIXELFORMAT_BGR888)
-	PixelFormatBGRX8888                = PixelFormat(C.SDL_PIXELFORMAT_BGRX8888)
-	PixelFormatARGB8888                = PixelFormat(C.SDL_PIXELFORMAT_ARGB8888)
-	PixelFormatRGBA8888                = PixelFormat(C.SDL_PIXELFORMAT_RGBA8888)
-	PixelFormatABGR8888                = PixelFormat(C.SDL_PIXELFORMAT_ABGR8888)
-	PixelFormatBGRA8888                = PixelFormat(C.SDL_PIXELFORMAT_BGRA8888)
-	PixelFormatARGB2101010             = PixelFormat(C.SDL_PIXELFORMAT_ARGB2101010)
-	PixelFormatYV12                    = PixelFormat(C.SDL_PIXELFORMAT_YV12)
-	PixelFormatIYUV                    = PixelFormat(C.SDL_PIXELFORMAT_IYUV)
-	PixelFormatYUY2                    = PixelFormat(C.SDL_PIXELFORMAT_YUY2)
-	PixelFormatUYVY                    = PixelFormat(C.SDL_PIXELFORMAT_UYVY)
-	PixelFormatYVYU                    = PixelFormat(C.SDL_PIXELFORMAT_YVYU)
+	PixelFormatUnknown     PixelFormatEnum = C.SDL_PIXELFORMAT_UNKNOWN
+	PixelFormatIndex1LSB   PixelFormatEnum = C.SDL_PIXELFORMAT_INDEX1LSB
+	PixelFormatIndex1MSB   PixelFormatEnum = C.SDL_PIXELFORMAT_INDEX1MSB
+	PixelFormatIndex4LSB   PixelFormatEnum = C.SDL_PIXELFORMAT_INDEX4LSB
+	PixelFormatIndex4MSB   PixelFormatEnum = C.SDL_PIXELFORMAT_INDEX4MSB
+	PixelFormatIndex8      PixelFormatEnum = C.SDL_PIXELFORMAT_INDEX8
+	PixelFormatRGB332      PixelFormatEnum = C.SDL_PIXELFORMAT_RGB332
+	PixelFormatRGB444      PixelFormatEnum = C.SDL_PIXELFORMAT_RGB444
+	PixelFormatRGB555      PixelFormatEnum = C.SDL_PIXELFORMAT_RGB555
+	PixelFormatBGR555      PixelFormatEnum = C.SDL_PIXELFORMAT_BGR555
+	PixelFormatARGB4444    PixelFormatEnum = C.SDL_PIXELFORMAT_ARGB4444
+	PixelFormatRGBA4444    PixelFormatEnum = C.SDL_PIXELFORMAT_RGBA4444
+	PixelFormatABGR4444    PixelFormatEnum = C.SDL_PIXELFORMAT_ABGR4444
+	PixelFormatBGRA4444    PixelFormatEnum = C.SDL_PIXELFORMAT_BGRA4444
+	PixelFormatARGB1555    PixelFormatEnum = C.SDL_PIXELFORMAT_ARGB1555
+	PixelFormatRGBA5551    PixelFormatEnum = C.SDL_PIXELFORMAT_RGBA5551
+	PixelFormatABGR1555    PixelFormatEnum = C.SDL_PIXELFORMAT_ABGR1555
+	PixelFormatBGRA5551    PixelFormatEnum = C.SDL_PIXELFORMAT_BGRA5551
+	PixelFormatRGB565      PixelFormatEnum = C.SDL_PIXELFORMAT_RGB565
+	PixelFormatBGR565      PixelFormatEnum = C.SDL_PIXELFORMAT_BGR565
+	PixelFormatRGB24       PixelFormatEnum = C.SDL_PIXELFORMAT_RGB24
+	PixelFormatBGR24       PixelFormatEnum = C.SDL_PIXELFORMAT_BGR24
+	PixelFormatRGB888      PixelFormatEnum = C.SDL_PIXELFORMAT_RGB888
+	PixelFormatRGBX8888    PixelFormatEnum = C.SDL_PIXELFORMAT_RGBX8888
+	PixelFormatBGR888      PixelFormatEnum = C.SDL_PIXELFORMAT_BGR888
+	PixelFormatBGRX8888    PixelFormatEnum = C.SDL_PIXELFORMAT_BGRX8888
+	PixelFormatARGB8888    PixelFormatEnum = C.SDL_PIXELFORMAT_ARGB8888
+	PixelFormatRGBA8888    PixelFormatEnum = C.SDL_PIXELFORMAT_RGBA8888
+	PixelFormatABGR8888    PixelFormatEnum = C.SDL_PIXELFORMAT_ABGR8888
+	PixelFormatBGRA8888    PixelFormatEnum = C.SDL_PIXELFORMAT_BGRA8888
+	PixelFormatARGB2101010 PixelFormatEnum = C.SDL_PIXELFORMAT_ARGB2101010
+	PixelFormatYV12        PixelFormatEnum = C.SDL_PIXELFORMAT_YV12
+	PixelFormatIYUV        PixelFormatEnum = C.SDL_PIXELFORMAT_IYUV
+	PixelFormatYUY2        PixelFormatEnum = C.SDL_PIXELFORMAT_YUY2
+	PixelFormatUYVY        PixelFormatEnum = C.SDL_PIXELFORMAT_UYVY
+	PixelFormatYVYU        PixelFormatEnum = C.SDL_PIXELFORMAT_YVYU
 )
 
 // END Pixel Info }}}1
@@ -241,7 +256,7 @@ func (pix PixelData) At(x, y int) color.Color {
 	pixel := *(*uint32)(ptr)
 
 	// TODO not necesarily NRGBA (which would be an entirely different codepath)
-	col := color.NRGBA{}
+	var col color.NRGBA
 
 	switch bytesPerPixel {
 	case 1:

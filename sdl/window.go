@@ -59,7 +59,7 @@ type RendererInfo struct {
 	Name              string
 	Flags             RendererFlags
 	NumTextureFormats uint32
-	TextureFormats    []PixelFormat
+	TextureFormats    []PixelFormatEnum
 	MaxTextureWidth   int
 	MaxTextureHeight  int
 }
@@ -113,7 +113,7 @@ func (r Renderer) GetRendererInfo() (i *RendererInfo, e error) {
 		return &RendererInfo{}, getError()
 	}
 
-	var textureFormats []PixelFormat
+	var textureFormats []PixelFormatEnum
 	sliceHeader := (*reflect.SliceHeader)((unsafe.Pointer(&textureFormats)))
 	sliceHeader.Cap = TextureFormatsSize
 	sliceHeader.Len = TextureFormatsSize
