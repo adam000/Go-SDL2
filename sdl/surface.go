@@ -12,8 +12,15 @@ import (
 	"unsafe"
 )
 
+// Surface is a rectangular array of pixels.
 type Surface struct {
 	s *C.SDL_Surface
+}
+
+// InternalSurface creates a surface from an SDL_Surface pointer.
+// This should only be used by other SDL packages.
+func InternalSurface(p unsafe.Pointer) Surface {
+	return Surface{(*C.SDL_Surface)(p)}
 }
 
 // PixelFormat returns the surface's pixel format.
