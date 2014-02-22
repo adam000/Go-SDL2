@@ -16,180 +16,18 @@ type Surface struct {
 	s *C.SDL_Surface
 }
 
-// BEGIN Pixel Info {{{1
-
-// The following helpers are modified directly from SDL 2.0 source code:
-// include/SDL_pixels.h
-
-type PixelType uint32
-
-// TODO assign from C #defines
-const (
-	PixelTypeUnknown PixelType = iota
-	PixelTypeIndex1
-	PixelTypeIndex4
-	PixelTypeIndex8
-	PixelTypePacked8
-	PixelTypePacked16
-	PixelTypePacked32
-	PixelTypeArrayU8
-	PixelTypeArrayU16
-	PixelTypeArrayU32
-	PixelTypeArrayF16
-	PixelTypeArrayF32
-)
-
-type PixelOrder uint32
-
-// Bitmap pixel order, high bit -> low bit.
-const (
-	BitmapOrderNone PixelOrder = iota
-	BitmapOrder4321
-	BitmapOrder1234
-)
-
-// Packed component order, high bit -> low bit.
-const (
-	PackedOrderNone PixelOrder = iota
-	PackedOrderXRGB
-	PackedOrderRGBX
-	PackedOrderARGB
-	PackedOrderRGBA
-	PackedOrderXBGR
-	PackedOrderBGRX
-	PackedOrderABGR
-	PackedOrderBGRA
-)
-
-// Array component order, low byte -> high byte.
-const (
-	ArrayOrderNone PixelOrder = iota
-	ArrayOrderRGB
-	ArrayOrderRGBA
-	ArrayOrderARGB
-	ArrayOrderBGR
-	ArrayOrderBGRA
-	ArrayOrderABGR
-)
-
-type PackedLayout uint32
-
-// Packed component layout.
-const (
-	PackedLayoutNone PackedLayout = iota
-	PackedLayout332
-	PackedLayout4444
-	PackedLayout1555
-	PackedLayout5551
-	PackedLayout565
-	PackedLayout8888
-	PackedLayout2101010
-	PackedLayout1010102
-)
-
-// TODO wrap these to their C macros
-func DEFINE_PIXELFOURCC(A, B, C, D uint32) PixelFormat {
-	return PixelFormat((A << 0) | (B << 8) | (C << 16) | (D << 24))
-}
-
-func DEFINE_PIXELFORMAT(typ PixelType, order PixelOrder, layout PackedLayout, bits, bytes uint32) PixelFormat {
-	return PixelFormat((1 << 28) | uint32(typ<<24) | uint32(order<<20) | uint32(layout<<16) | uint32(bits<<8) | uint32(bytes<<0))
-}
-
-func PIXELFLAG(X PixelFormat) PixelFormat {
-	return (X >> 28) & 0x0F
-}
-
-func PIXELTYPE(X PixelFormat) PixelType {
-	return PixelType((X >> 24) & 0x0F)
-}
-
-func PIXELORDER(X PixelFormat) PixelOrder {
-	return PixelOrder((X >> 20) & 0x0F)
-}
-
-func PIXELLAYOUT(X PixelFormat) PackedLayout {
-	return PackedLayout((X >> 16) & 0x0F)
-}
-
-func BITSPERPIXEL(X PixelFormat) uint32 {
-	return uint32(X>>8) & 0xFF
-}
-
-func BYTESPERPIXEL(X PixelFormat) PixelFormat {
-	if ISPIXELFORMAT_FOURCC(X) {
-		if X == PixelFormatYUY2 || X == PixelFormatUYVY || X == PixelFormatYVYU {
-			return 2
-		}
-		return 1
+// PixelFormat returns the surface's pixel format.
+func (surface Surface) PixelFormat() *PixelFormat {
+	return &PixelFormat{
+		Format:        PixelFormatEnum(surface.s.format.format),
+		BitsPerPixel:  uint8(surface.s.format.BitsPerPixel),
+		BytesPerPixel: uint8(surface.s.format.BytesPerPixel),
+		Rmask:         uint32(surface.s.format.Rmask),
+		Gmask:         uint32(surface.s.format.Gmask),
+		Bmask:         uint32(surface.s.format.Bmask),
+		Amask:         uint32(surface.s.format.Amask),
 	}
-	return (X >> 0) & 0xFF
 }
-
-func ISPIXELFORMAT_INDEXED(format PixelFormat) bool {
-	pixelType := PIXELTYPE(format)
-	return !ISPIXELFORMAT_FOURCC(format) &&
-		((pixelType == PixelTypeIndex1) ||
-			(pixelType == PixelTypeIndex4) ||
-			(pixelType == PixelTypeIndex8))
-}
-
-func ISPIXELFORMAT_ALPHA(format PixelFormat) bool {
-	pixelOrder := PIXELORDER(format)
-	return !ISPIXELFORMAT_FOURCC(format) &&
-		((pixelOrder == PackedOrderARGB) ||
-			(pixelOrder == PackedOrderRGBA) ||
-			(pixelOrder == PackedOrderABGR) ||
-			(pixelOrder == PackedOrderBGRA))
-}
-
-// The flag is set to 1 because 0x1? is not in the printable ASCII range
-func ISPIXELFORMAT_FOURCC(format PixelFormat) bool {
-	return format != 0 && PIXELFLAG(format) != 1
-}
-
-type PixelFormat uint32
-
-const (
-	PixelFormatUnknown     PixelFormat = PixelFormat(C.SDL_PIXELFORMAT_UNKNOWN)
-	PixelFormatIndex1LSB               = PixelFormat(C.SDL_PIXELFORMAT_INDEX1LSB)
-	PixelFormatIndex1MSB               = PixelFormat(C.SDL_PIXELFORMAT_INDEX1MSB)
-	PixelFormatIndex4LSB               = PixelFormat(C.SDL_PIXELFORMAT_INDEX4LSB)
-	PixelFormatIndex4MSB               = PixelFormat(C.SDL_PIXELFORMAT_INDEX4MSB)
-	PixelFormatIndex8                  = PixelFormat(C.SDL_PIXELFORMAT_INDEX8)
-	PixelFormatRGB332                  = PixelFormat(C.SDL_PIXELFORMAT_RGB332)
-	PixelFormatRGB444                  = PixelFormat(C.SDL_PIXELFORMAT_RGB444)
-	PixelFormatRGB555                  = PixelFormat(C.SDL_PIXELFORMAT_RGB555)
-	PixelFormatBGR555                  = PixelFormat(C.SDL_PIXELFORMAT_BGR555)
-	PixelFormatARGB4444                = PixelFormat(C.SDL_PIXELFORMAT_ARGB4444)
-	PixelFormatRGBA4444                = PixelFormat(C.SDL_PIXELFORMAT_RGBA4444)
-	PixelFormatABGR4444                = PixelFormat(C.SDL_PIXELFORMAT_ABGR4444)
-	PixelFormatBGRA4444                = PixelFormat(C.SDL_PIXELFORMAT_BGRA4444)
-	PixelFormatARGB1555                = PixelFormat(C.SDL_PIXELFORMAT_ARGB1555)
-	PixelFormatRGBA5551                = PixelFormat(C.SDL_PIXELFORMAT_RGBA5551)
-	PixelFormatABGR1555                = PixelFormat(C.SDL_PIXELFORMAT_ABGR1555)
-	PixelFormatBGRA5551                = PixelFormat(C.SDL_PIXELFORMAT_BGRA5551)
-	PixelFormatRGB565                  = PixelFormat(C.SDL_PIXELFORMAT_RGB565)
-	PixelFormatBGR565                  = PixelFormat(C.SDL_PIXELFORMAT_BGR565)
-	PixelFormatRGB24                   = PixelFormat(C.SDL_PIXELFORMAT_RGB24)
-	PixelFormatBGR24                   = PixelFormat(C.SDL_PIXELFORMAT_BGR24)
-	PixelFormatRGB888                  = PixelFormat(C.SDL_PIXELFORMAT_RGB888)
-	PixelFormatRGBX8888                = PixelFormat(C.SDL_PIXELFORMAT_RGBX8888)
-	PixelFormatBGR888                  = PixelFormat(C.SDL_PIXELFORMAT_BGR888)
-	PixelFormatBGRX8888                = PixelFormat(C.SDL_PIXELFORMAT_BGRX8888)
-	PixelFormatARGB8888                = PixelFormat(C.SDL_PIXELFORMAT_ARGB8888)
-	PixelFormatRGBA8888                = PixelFormat(C.SDL_PIXELFORMAT_RGBA8888)
-	PixelFormatABGR8888                = PixelFormat(C.SDL_PIXELFORMAT_ABGR8888)
-	PixelFormatBGRA8888                = PixelFormat(C.SDL_PIXELFORMAT_BGRA8888)
-	PixelFormatARGB2101010             = PixelFormat(C.SDL_PIXELFORMAT_ARGB2101010)
-	PixelFormatYV12                    = PixelFormat(C.SDL_PIXELFORMAT_YV12)
-	PixelFormatIYUV                    = PixelFormat(C.SDL_PIXELFORMAT_IYUV)
-	PixelFormatYUY2                    = PixelFormat(C.SDL_PIXELFORMAT_YUY2)
-	PixelFormatUYVY                    = PixelFormat(C.SDL_PIXELFORMAT_UYVY)
-	PixelFormatYVYU                    = PixelFormat(C.SDL_PIXELFORMAT_YVYU)
-)
-
-// END Pixel Info }}}1
 
 func (surface Surface) PixelData() (PixelData, error) {
 	if result := C.SDL_LockSurface(surface.s); result < 0 {
@@ -241,7 +79,7 @@ func (pix PixelData) At(x, y int) color.Color {
 	pixel := *(*uint32)(ptr)
 
 	// TODO not necesarily NRGBA (which would be an entirely different codepath)
-	col := color.NRGBA{}
+	var col color.NRGBA
 
 	switch bytesPerPixel {
 	case 1:
