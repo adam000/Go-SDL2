@@ -143,7 +143,8 @@ func convertEvent(cEvent unsafe.Pointer) Event {
 	common := (*C.SDL_CommonEvent)(cEvent)
 	switch EventType(common._type) {
 	case QuitEv:
-		return QuitEvent{(*C.SDL_QuitEvent)(cEvent)}
+		// Quit events don't hold any data beyond the common events.
+		return commonEvent{common}
 	case KeyDownEv, KeyUpEv:
 		return KeyboardEvent{(*C.SDL_KeyboardEvent)(cEvent)}
 	default:
@@ -315,21 +316,6 @@ type ControllerDeviceEvent struct {
 }
 
 // }}}2 ControllerDeviceEvent
-
-// {{{2 QuitEvent
-type QuitEvent struct {
-	e *C.SDL_QuitEvent
-}
-
-func (e QuitEvent) Timestamp() uint32 {
-	return uint32(e.e.timestamp)
-}
-
-func (e QuitEvent) Type() EventType {
-	return QuitEv
-}
-
-// }}}2 QuitEvent
 
 // {{{2 UserEvent
 // TODO make this implement Event
