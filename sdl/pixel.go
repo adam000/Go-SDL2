@@ -41,83 +41,20 @@ package sdl
 // }
 import "C"
 
-type PixelType uint32
-
-// Pixel types.
-const (
-	PixelTypeUnknown  PixelType = C.SDL_PIXELTYPE_UNKNOWN
-	PixelTypeIndex1   PixelType = C.SDL_PIXELTYPE_INDEX1
-	PixelTypeIndex4   PixelType = C.SDL_PIXELTYPE_INDEX4
-	PixelTypeIndex8   PixelType = C.SDL_PIXELTYPE_INDEX8
-	PixelTypePacked8  PixelType = C.SDL_PIXELTYPE_PACKED8
-	PixelTypePacked16 PixelType = C.SDL_PIXELTYPE_PACKED16
-	PixelTypePacked32 PixelType = C.SDL_PIXELTYPE_PACKED32
-	PixelTypeArrayU8  PixelType = C.SDL_PIXELTYPE_ARRAYU8
-	PixelTypeArrayU16 PixelType = C.SDL_PIXELTYPE_ARRAYU16
-	PixelTypeArrayU32 PixelType = C.SDL_PIXELTYPE_ARRAYU32
-	PixelTypeArrayF16 PixelType = C.SDL_PIXELTYPE_ARRAYF16
-	PixelTypeArrayF32 PixelType = C.SDL_PIXELTYPE_ARRAYF32
-)
-
-type PixelOrder uint32
-
-// Bitmap pixel order, high bit -> low bit.
-const (
-	BitmapOrderNone PixelOrder = iota
-	BitmapOrder4321
-	BitmapOrder1234
-)
-
-// Packed component order, high bit -> low bit.
-const (
-	PackedOrderNone PixelOrder = iota
-	PackedOrderXRGB
-	PackedOrderRGBX
-	PackedOrderARGB
-	PackedOrderRGBA
-	PackedOrderXBGR
-	PackedOrderBGRX
-	PackedOrderABGR
-	PackedOrderBGRA
-)
-
-// Array component order, low byte -> high byte.
-const (
-	ArrayOrderNone PixelOrder = iota
-	ArrayOrderRGB
-	ArrayOrderRGBA
-	ArrayOrderARGB
-	ArrayOrderBGR
-	ArrayOrderBGRA
-	ArrayOrderABGR
-)
-
-type PixelLayout uint32
-
-// Packed component layout.
-const (
-	PackedLayoutNone PixelLayout = iota
-	PackedLayout332
-	PackedLayout4444
-	PackedLayout1555
-	PackedLayout5551
-	PackedLayout565
-	PackedLayout8888
-	PackedLayout2101010
-	PackedLayout1010102
-)
-
 // PixelFormatEnum describes the method of storing pixel data.
 type PixelFormatEnum uint32
 
+// PixelType returns the data type used for the pixel format.
 func (pf PixelFormatEnum) PixelType() PixelType {
 	return PixelType(C.goSDL_pixelType(C.Uint32(pf)))
 }
 
+// PixelOrder returns the ordering of channels in the pixel format.
 func (pf PixelFormatEnum) PixelOrder() PixelOrder {
 	return PixelOrder(C.goSDL_pixelOrder(C.Uint32(pf)))
 }
 
+// PixelLayout returns the layout of channels in a packed pixel format.
 func (pf PixelFormatEnum) PixelLayout() PixelLayout {
 	return PixelLayout(C.goSDL_pixelLayout(C.Uint32(pf)))
 }
@@ -139,14 +76,18 @@ func (pf PixelFormatEnum) String() string {
 	return C.GoString(C.SDL_GetPixelFormatName(C.Uint32(pf)))
 }
 
+// IsIndexed reports whether the pixel format has a palette.
 func (pf PixelFormatEnum) IsIndexed() bool {
 	return C.goSDL_isPixelFormatIndexed(C.Uint32(pf)) != 0
 }
 
+// IsAlpha reports whether the pixel format has an alpha channel.
 func (pf PixelFormatEnum) IsAlpha() bool {
 	return C.goSDL_isPixelFormatAlpha(C.Uint32(pf)) != 0
 }
 
+// IsFourCC reports whether the pixel format is a four-character code,
+// like YUV.
 func (pf PixelFormatEnum) IsFourCC() bool {
 	return C.goSDL_isPixelFormatFourCC(C.Uint32(pf)) != 0
 }
@@ -189,4 +130,73 @@ const (
 	PixelFormatYUY2        PixelFormatEnum = C.SDL_PIXELFORMAT_YUY2
 	PixelFormatUYVY        PixelFormatEnum = C.SDL_PIXELFORMAT_UYVY
 	PixelFormatYVYU        PixelFormatEnum = C.SDL_PIXELFORMAT_YVYU
+)
+
+// PixelType is a pixel format's data type.
+type PixelType uint32
+
+// Pixel types.
+const (
+	PixelTypeUnknown  PixelType = C.SDL_PIXELTYPE_UNKNOWN
+	PixelTypeIndex1   PixelType = C.SDL_PIXELTYPE_INDEX1
+	PixelTypeIndex4   PixelType = C.SDL_PIXELTYPE_INDEX4
+	PixelTypeIndex8   PixelType = C.SDL_PIXELTYPE_INDEX8
+	PixelTypePacked8  PixelType = C.SDL_PIXELTYPE_PACKED8
+	PixelTypePacked16 PixelType = C.SDL_PIXELTYPE_PACKED16
+	PixelTypePacked32 PixelType = C.SDL_PIXELTYPE_PACKED32
+	PixelTypeArrayU8  PixelType = C.SDL_PIXELTYPE_ARRAYU8
+	PixelTypeArrayU16 PixelType = C.SDL_PIXELTYPE_ARRAYU16
+	PixelTypeArrayU32 PixelType = C.SDL_PIXELTYPE_ARRAYU32
+	PixelTypeArrayF16 PixelType = C.SDL_PIXELTYPE_ARRAYF16
+	PixelTypeArrayF32 PixelType = C.SDL_PIXELTYPE_ARRAYF32
+)
+
+// PixelOrder is a pixel format's channel order.
+type PixelOrder uint32
+
+// Bitmap pixel order, high bit -> low bit.
+const (
+	BitmapOrderNone PixelOrder = C.SDL_BITMAPORDER_NONE
+	BitmapOrder4321 PixelOrder = C.SDL_BITMAPORDER_4321
+	BitmapOrder1234 PixelOrder = C.SDL_BITMAPORDER_1234
+)
+
+// Packed component order, high bit -> low bit.
+const (
+	PackedOrderNone PixelOrder = C.SDL_PACKEDORDER_NONE
+	PackedOrderXRGB PixelOrder = C.SDL_PACKEDORDER_XRGB
+	PackedOrderRGBX PixelOrder = C.SDL_PACKEDORDER_RGBX
+	PackedOrderARGB PixelOrder = C.SDL_PACKEDORDER_ARGB
+	PackedOrderRGBA PixelOrder = C.SDL_PACKEDORDER_RGBA
+	PackedOrderXBGR PixelOrder = C.SDL_PACKEDORDER_XBGR
+	PackedOrderBGRX PixelOrder = C.SDL_PACKEDORDER_BGRX
+	PackedOrderABGR PixelOrder = C.SDL_PACKEDORDER_ABGR
+	PackedOrderBGRA PixelOrder = C.SDL_PACKEDORDER_BGRA
+)
+
+// Array component order, low byte -> high byte.
+const (
+	ArrayOrderNone PixelOrder = C.SDL_ARRAYORDER_NONE
+	ArrayOrderRGB  PixelOrder = C.SDL_ARRAYORDER_RGB
+	ArrayOrderRGBA PixelOrder = C.SDL_ARRAYORDER_RGBA
+	ArrayOrderARGB PixelOrder = C.SDL_ARRAYORDER_ARGB
+	ArrayOrderBGR  PixelOrder = C.SDL_ARRAYORDER_BGR
+	ArrayOrderBGRA PixelOrder = C.SDL_ARRAYORDER_BGRA
+	ArrayOrderABGR PixelOrder = C.SDL_ARRAYORDER_ABGR
+)
+
+// PixelLayout is a packed pixel format's channel bit layout.
+type PixelLayout uint32
+
+// Packed channel layouts.
+const (
+	PackedLayoutNone    PixelLayout = C.SDL_PACKEDLAYOUT_NONE
+	PackedLayout332     PixelLayout = C.SDL_PACKEDLAYOUT_332
+	PackedLayout4444    PixelLayout = C.SDL_PACKEDLAYOUT_4444
+	PackedLayout1555    PixelLayout = C.SDL_PACKEDLAYOUT_1555
+	PackedLayout5551    PixelLayout = C.SDL_PACKEDLAYOUT_5551
+	PackedLayout565     PixelLayout = C.SDL_PACKEDLAYOUT_565
+	PackedLayout8888    PixelLayout = C.SDL_PACKEDLAYOUT_8888
+	PackedLayout2101010 PixelLayout = C.SDL_PACKEDLAYOUT_2101010
+	PackedLayout1010102 PixelLayout = C.SDL_PACKEDLAYOUT_1010102
 )
