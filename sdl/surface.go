@@ -31,7 +31,7 @@ func (surface Surface) PixelFormat() *PixelFormat {
 
 func (surface Surface) PixelData() (PixelData, error) {
 	if result := C.SDL_LockSurface(surface.s); result < 0 {
-		return PixelData{}, getError()
+		return PixelData{}, GetError()
 	}
 	return PixelData{s: surface.s}, nil
 }
@@ -40,7 +40,7 @@ func (surface Surface) PixelData() (PixelData, error) {
 func (surface Surface) ToTexture(renderer Renderer) (Texture, error) {
 	txt := C.SDL_CreateTextureFromSurface(renderer.r, surface.s)
 	if txt == nil {
-		return Texture{}, getError()
+		return Texture{}, GetError()
 	}
 	return Texture{txt}, nil
 }

@@ -32,7 +32,7 @@ func Init(flags ...InitFlag) error {
 		f |= flags[i]
 	}
 	if C.SDL_Init(C.Uint32(f)) != 0 {
-		return getError()
+		return GetError()
 	}
 	return nil
 }
