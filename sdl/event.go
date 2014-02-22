@@ -17,101 +17,104 @@ import (
 
 // START EventType {{{1
 
-// TODO put all these consts in 1 block and assign them to their C #define equivalents.
-// And suffix with Event instead of Ev
-type EventType uint16
+// TODO(adam): Suffix with Event instead of Ev?
 
+// EventType represents the type of an application event.
+type EventType uint32
+
+// IsUserEvent reports whether t is a custom application event.
+func (t EventType) IsUserEvent() bool {
+	return t >= UserEvent && t <= LastEvent
+}
+
+// Special event numbers
 const (
-	FirstEvent EventType = 0
+	FirstEvent EventType = C.SDL_FIRSTEVENT
+
+	// Events UserEvent through LastEvent are for your use, and should be allocated
+	// with RegisterEvents.
+	UserEvent EventType = C.SDL_USEREVENT
+	LastEvent EventType = C.SDL_LASTEVENT
 )
 
-/* Application events */
+// Application events
 const (
-	QuitEv EventType = 0x100 + iota
-	/* These application events have special meaning on iOS, see README-ios.txt for details */
-	AppTerminatingEv
-	AppLowMemoryEv
-	AppWillEnterBackgroundEv
-	AppDidEnterBackgroundEv
-	AppWillEnterForegroundEv
-	AppDidEnterForegroundEv
+	QuitEv EventType = C.SDL_QUIT
+
+	// These application events have special meaning on iOS, see README-ios.txt for details
+	AppTerminatingEv         EventType = C.SDL_APP_TERMINATING
+	AppLowMemoryEv           EventType = C.SDL_APP_LOWMEMORY
+	AppWillEnterBackgroundEv EventType = C.SDL_APP_WILLENTERBACKGROUND
+	AppDidEnterBackgroundEv  EventType = C.SDL_APP_DIDENTERBACKGROUND
+	AppWillEnterForegroundEv EventType = C.SDL_APP_WILLENTERFOREGROUND
+	AppDidEnterForegroundEv  EventType = C.SDL_APP_DIDENTERFOREGROUND
 )
 
-/* Window events */
+// Window events
 const (
-	WindowEv EventType = 0x200 + iota
-	SysWmEv
+	WindowEv EventType = C.SDL_WINDOWEVENT
+	SysWmEv  EventType = C.SDL_SYSWMEVENT
 )
 
-/* Keyboard events */
+// Keyboard events
 const (
-	KeyDownEv EventType = 0x300 + iota
-	KeyUpEv
-	TextEditingEv
-	TextInputEv
+	KeyDownEv     EventType = C.SDL_KEYDOWN
+	KeyUpEv       EventType = C.SDL_KEYUP
+	TextEditingEv EventType = C.SDL_TEXTEDITING
+	TextInputEv   EventType = C.SDL_TEXTINPUT
 )
 
-/* Mouse events */
+// Mouse events
 const (
-	MouseMotionEv EventType = 0x400 + iota
-	MouseButtonDownEv
-	MouseButtonUpEv
-	MouseWheelEv
+	MouseMotionEv     EventType = C.SDL_MOUSEMOTION
+	MouseButtonDownEv EventType = C.SDL_MOUSEBUTTONDOWN
+	MouseButtonUpEv   EventType = C.SDL_MOUSEBUTTONUP
+	MouseWheelEv      EventType = C.SDL_MOUSEWHEEL
 )
 
-/* Joystick events */
+// Joystick events
 const (
-	JoyAxisMotionEv EventType = 0x600 + iota
-	JoyBallMotionEv
-	JoyHatMotionEv
-	JoyButtonDownEv
-	JoyButtonUpEv
-	JoyDeviceAddedEv
-	JoyDeviceRemovedEv
+	JoyAxisMotionEv    EventType = C.SDL_JOYAXISMOTION
+	JoyBallMotionEv    EventType = C.SDL_JOYBALLMOTION
+	JoyHatMotionEv     EventType = C.SDL_JOYHATMOTION
+	JoyButtonDownEv    EventType = C.SDL_JOYBUTTONDOWN
+	JoyButtonUpEv      EventType = C.SDL_JOYBUTTONUP
+	JoyDeviceAddedEv   EventType = C.SDL_JOYDEVICEADDED
+	JoyDeviceRemovedEv EventType = C.SDL_JOYDEVICEREMOVED
 )
 
-/* Game controller events */
+// Game controller events
 const (
-	ControllerAxisMotionEv EventType = 0x650 + iota
-	ControllerButtonDownEv
-	ControllerButtonUpEv
-	ControllerDeviceAddedEv
-	ControllerDeviceRemovedEv
-	ControllerDeviceRemappedEv
+	ControllerAxisMotionEv     EventType = C.SDL_CONTROLLERAXISMOTION
+	ControllerButtonDownEv     EventType = C.SDL_CONTROLLERBUTTONDOWN
+	ControllerButtonUpEv       EventType = C.SDL_CONTROLLERBUTTONUP
+	ControllerDeviceAddedEv    EventType = C.SDL_CONTROLLERDEVICEADDED
+	ControllerDeviceRemovedEv  EventType = C.SDL_CONTROLLERDEVICEREMOVED
+	ControllerDeviceRemappedEv EventType = C.SDL_CONTROLLERDEVICEREMAPPED
 )
 
-/* Touch events */
+// Touch events
 const (
-	FingerDownEv EventType = 0x700 + iota
-	FingerUpEv
-	FingerMotionEv
+	FingerDownEv   EventType = C.SDL_FINGERDOWN
+	FingerUpEv     EventType = C.SDL_FINGERUP
+	FingerMotionEv EventType = C.SDL_FINGERMOTION
 )
 
-/* Gesture events */
+// Gesture events
 const (
-	DollarGestureEv EventType = 0x800 + iota
-	DollarRecordEv
-	MultiGestureEv
+	DollarGestureEv EventType = C.SDL_DOLLARGESTURE
+	DollarRecordEv  EventType = C.SDL_DOLLARRECORD
+	MultiGestureEv  EventType = C.SDL_MULTIGESTURE
 )
 
-/* Clipboard events */
+// Clipboard events
 const (
-	ClipboardUpdateEv EventType = 0x900
+	ClipboardUpdateEv EventType = C.SDL_CLIPBOARDUPDATE
 )
 
-/* Drag and drop events */
+// Drag and drop events
 const (
-	DropFileEv EventType = 0x1000
-)
-
-/*
-Events ::USEREVENT through ::LASTEVENT are for your use
-and should be allocated with RegisterEvents()
-*/
-const (
-	UserEv EventType = 0x8000
-	// This last event is only for bounding internal arrays
-	LastEv EventType = 0xFFFF
+	DropFileEv EventType = C.SDL_DROPFILE
 )
 
 // END EventType }}}1
