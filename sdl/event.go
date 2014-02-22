@@ -163,6 +163,7 @@ func convertEvent(cEvent *C.SDL_Event) (ev Event) {
 type CommonEvent struct {
 	ev C.SDL_CommonEvent
 }
+
 // }}}2 CommonEvent
 
 // {{{2 WindowEvent
@@ -170,6 +171,7 @@ type CommonEvent struct {
 type WindowEvent struct {
 	ev C.SDL_WindowEvent
 }
+
 // }}}2 WindowEvent
 
 // {{{2 KeyboardEvent
@@ -210,6 +212,7 @@ func (e KeyboardEvent) Keysym() Keysym {
 type TextEditingEvent struct {
 	ev C.SDL_TextEditingEvent
 }
+
 // }}}2 TextEditingEvent
 
 // {{{2 TextInputEvent
@@ -217,6 +220,7 @@ type TextEditingEvent struct {
 type TextInputEvent struct {
 	ev C.SDL_TextInputEvent
 }
+
 // }}}2 TextInputEvent
 
 // {{{2 MouseMotionEvent
@@ -224,6 +228,7 @@ type TextInputEvent struct {
 type MouseMotionEvent struct {
 	ev C.SDL_MouseMotionEvent
 }
+
 // }}}2 MouseMotionEvent
 
 // {{{2 MouseButtonEvent
@@ -231,6 +236,7 @@ type MouseMotionEvent struct {
 type MouseButtonEvent struct {
 	ev C.SDL_MouseButtonEvent
 }
+
 // }}}2 MouseButtonEvent
 
 // {{{2 MouseWheelEvent
@@ -238,6 +244,7 @@ type MouseButtonEvent struct {
 type MouseWheelEvent struct {
 	ev C.SDL_MouseWheelEvent
 }
+
 // }}}2 MouseWheelEvent
 
 // {{{2 JoyAxisEvent
@@ -245,6 +252,7 @@ type MouseWheelEvent struct {
 type JoyAxisEvent struct {
 	ev C.SDL_JoyAxisEvent
 }
+
 // }}}2 JoyAxisEvent
 
 // {{{2 JoyBallEvent
@@ -252,6 +260,7 @@ type JoyAxisEvent struct {
 type JoyBallEvent struct {
 	ev C.SDL_JoyBallEvent
 }
+
 // }}}2 JoyBallEvent
 
 // {{{2 JoyHatEvent
@@ -259,6 +268,7 @@ type JoyBallEvent struct {
 type JoyHatEvent struct {
 	ev C.SDL_JoyHatEvent
 }
+
 // }}}2 JoyHatEvent
 
 // {{{2 JoyButtonEvent
@@ -266,6 +276,7 @@ type JoyHatEvent struct {
 type JoyButtonEvent struct {
 	ev C.SDL_JoyButtonEvent
 }
+
 // }}}2 JoyButtonEvent
 
 // {{{2 JoyDeviceEvent
@@ -273,6 +284,7 @@ type JoyButtonEvent struct {
 type JoyDeviceEvent struct {
 	ev C.SDL_JoyDeviceEvent
 }
+
 // }}}2 JoyDeviceEvent
 
 // {{{2 ControllerAxisEvent
@@ -280,6 +292,7 @@ type JoyDeviceEvent struct {
 type ControllerAxisEvent struct {
 	ev C.SDL_ControllerAxisEvent
 }
+
 // }}}2 ControllerAxisEvent
 
 // {{{2 ControllerButtonEvent
@@ -287,6 +300,7 @@ type ControllerAxisEvent struct {
 type ControllerButtonEvent struct {
 	ev C.SDL_ControllerButtonEvent
 }
+
 // }}}2 ControllerButtonEvent
 
 // {{{2 ControllerDeviceEvent
@@ -294,6 +308,7 @@ type ControllerButtonEvent struct {
 type ControllerDeviceEvent struct {
 	ev C.SDL_ControllerDeviceEvent
 }
+
 // }}}2 ControllerDeviceEvent
 
 // {{{2 QuitEvent
@@ -308,6 +323,7 @@ func (e QuitEvent) Timestamp() uint32 {
 func (e QuitEvent) Type() EventType {
 	return QuitEv
 }
+
 // }}}2 QuitEvent
 
 // {{{2 UserEvent
@@ -315,6 +331,7 @@ func (e QuitEvent) Type() EventType {
 type UserEvent struct {
 	ev C.SDL_UserEvent
 }
+
 // }}}2 UserEvent
 
 // {{{2 SysWMEvent
@@ -322,6 +339,7 @@ type UserEvent struct {
 type SysWMEvent struct {
 	ev C.SDL_SysWMEvent
 }
+
 // }}}2 SysWMEvent
 
 // {{{2 TouchFingerEvent
@@ -329,6 +347,7 @@ type SysWMEvent struct {
 type TouchFingerEvent struct {
 	ev C.SDL_TouchFingerEvent
 }
+
 // }}}2 TouchFingerEvent
 
 // {{{2 MultiGestureEvent
@@ -336,6 +355,7 @@ type TouchFingerEvent struct {
 type MultiGestureEvent struct {
 	ev C.SDL_MultiGestureEvent
 }
+
 // }}}2 MultiGestureEvent
 
 // {{{2 DollarGestureEvent
@@ -343,6 +363,7 @@ type MultiGestureEvent struct {
 type DollarGestureEvent struct {
 	ev C.SDL_DollarGestureEvent
 }
+
 // }}}2 DollarGestureEvent
 
 // {{{2 DropEvent
@@ -350,6 +371,7 @@ type DollarGestureEvent struct {
 type DropEvent struct {
 	ev C.SDL_DropEvent
 }
+
 // }}}2 DropEvent
 
 // }}}1 Event Structs
