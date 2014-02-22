@@ -1,27 +1,9 @@
 package sdl
 
-// TODO put these C functions in their own event.c file
-
 // #cgo pkg-config: sdl2
 // #cgo LDFLAGS: -lSDL2_image
 //
 // #include "SDL.h"
-//
-// Uint32 GetType(SDL_Event* ev) {
-//		return ev->type;
-// }
-//
-// SDL_CommonEvent* ConvertToCommonEvent(SDL_Event* ev) {
-//		return &ev->common;
-// }
-//
-// SDL_QuitEvent* ConvertToQuitEvent(SDL_Event* ev) {
-//		return &ev->quit;
-// }
-//
-// SDL_KeyboardEvent* ConvertToKeyboardEvent(SDL_Event* ev) {
-//		return &ev->key;
-// }
 import "C"
 
 import (
@@ -149,7 +131,7 @@ func PollEvent() Event {
 	if C.SDL_PollEvent(&cEvent) == 0 {
 		return nil
 	}
-	return convertEvent(&cEvent)
+	return convertEvent(unsafe.Pointer(&cEvent))
 }
 
 // HasEvent returns whether there is a pending event available.
@@ -157,15 +139,16 @@ func HasEvent() bool {
 	return C.SDL_PollEvent(nil) != 0
 }
 
-func convertEvent(cEvent *C.SDL_Event) (ev Event) {
-	switch t := EventType(C.GetType(cEvent)); t {
+func convertEvent(cEvent unsafe.Pointer) Event {
+	common := (*C.SDL_CommonEvent)(cEvent)
+	switch EventType(common._type) {
 	case QuitEv:
-		return QuitEvent{C.ConvertToQuitEvent(cEvent)}
+		return QuitEvent{(*C.SDL_QuitEvent)(cEvent)}
 	case KeyDownEv, KeyUpEv:
-		return KeyboardEvent{C.ConvertToKeyboardEvent(cEvent)}
+		return KeyboardEvent{(*C.SDL_KeyboardEvent)(cEvent)}
 	default:
-		fmt.Println("Unhandled event with int:", int(t))
-		return commonEvent{C.ConvertToCommonEvent(cEvent)}
+		fmt.Println("Unhandled event with int:", int(common._type))
+		return commonEvent{common}
 	}
 }
 
@@ -207,8 +190,7 @@ func (e KeyboardEvent) Timestamp() uint32 {
 }
 
 func (e KeyboardEvent) Type() EventType {
-	// Have to do this icky thing to get what type of keyboard event it is
-	return EventType(C.GetType((*C.SDL_Event)(unsafe.Pointer(e.e))))
+	return EventType(e.e._type)
 }
 
 func (e KeyboardEvent) WindowID() uint32 {
