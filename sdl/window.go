@@ -16,19 +16,19 @@ type WindowFlag uint32
 
 const (
 	WindowFullscreen        WindowFlag = C.SDL_WINDOW_FULLSCREEN
-	WindowOpenGL                       = C.SDL_WINDOW_OPENGL
-	WindowShown                        = C.SDL_WINDOW_SHOWN
-	WindowHidden                       = C.SDL_WINDOW_HIDDEN
-	WindowBorderless                   = C.SDL_WINDOW_BORDERLESS
-	WindowResizable                    = C.SDL_WINDOW_RESIZABLE
-	WindowMinimized                    = C.SDL_WINDOW_MINIMIZED
-	WindowMaximized                    = C.SDL_WINDOW_MAXIMIZED
-	WindowInputGrabbed                 = C.SDL_WINDOW_INPUT_GRABBED
-	WindowInputFocus                   = C.SDL_WINDOW_INPUT_FOCUS
-	WindowMouseFocus                   = C.SDL_WINDOW_MOUSE_FOCUS
-	WindowForeign                      = C.SDL_WINDOW_FOREIGN
-	WindowAllowHighDPI                 = C.SDL_WINDOW_ALLOW_HIGHDPI
-	WindowFullscreenDesktop            = C.SDL_WINDOW_FULLSCREEN_DESKTOP
+	WindowOpenGL            WindowFlag = C.SDL_WINDOW_OPENGL
+	WindowShown             WindowFlag = C.SDL_WINDOW_SHOWN
+	WindowHidden            WindowFlag = C.SDL_WINDOW_HIDDEN
+	WindowBorderless        WindowFlag = C.SDL_WINDOW_BORDERLESS
+	WindowResizable         WindowFlag = C.SDL_WINDOW_RESIZABLE
+	WindowMinimized         WindowFlag = C.SDL_WINDOW_MINIMIZED
+	WindowMaximized         WindowFlag = C.SDL_WINDOW_MAXIMIZED
+	WindowInputGrabbed      WindowFlag = C.SDL_WINDOW_INPUT_GRABBED
+	WindowInputFocus        WindowFlag = C.SDL_WINDOW_INPUT_FOCUS
+	WindowMouseFocus        WindowFlag = C.SDL_WINDOW_MOUSE_FOCUS
+	WindowForeign           WindowFlag = C.SDL_WINDOW_FOREIGN
+	WindowAllowHighDPI      WindowFlag = C.SDL_WINDOW_ALLOW_HIGHDPI
+	WindowFullscreenDesktop WindowFlag = C.SDL_WINDOW_FULLSCREEN_DESKTOP
 )
 
 const WindowPosUndefined = C.SDL_WINDOWPOS_UNDEFINED
