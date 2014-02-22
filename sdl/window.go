@@ -15,25 +15,24 @@ import "C"
 type WindowFlag uint32
 
 const (
-	WindowFullscreen WindowFlag = 1 << iota
-	WindowOpenGL
-	WindowShown
-	WindowHidden
-	WindowBorderless
-	WindowResizable
-	WindowMinimized
-	WindowMaximized
-	WindowInputGrabbed
-	WindowInputFocus
-	WindowMouseFocus
-	WindowForeign
-	_
-	WindowAllowHighDpi
-	WindowFullscreenDesktop = 0x00001001
+	WindowFullscreen        WindowFlag = C.SDL_WINDOW_FULLSCREEN
+	WindowOpenGL                       = C.SDL_WINDOW_OPENGL
+	WindowShown                        = C.SDL_WINDOW_SHOWN
+	WindowHidden                       = C.SDL_WINDOW_HIDDEN
+	WindowBorderless                   = C.SDL_WINDOW_BORDERLESS
+	WindowResizable                    = C.SDL_WINDOW_RESIZABLE
+	WindowMinimized                    = C.SDL_WINDOW_MINIMIZED
+	WindowMaximized                    = C.SDL_WINDOW_MAXIMIZED
+	WindowInputGrabbed                 = C.SDL_WINDOW_INPUT_GRABBED
+	WindowInputFocus                   = C.SDL_WINDOW_INPUT_FOCUS
+	WindowMouseFocus                   = C.SDL_WINDOW_MOUSE_FOCUS
+	WindowForeign                      = C.SDL_WINDOW_FOREIGN
+	WindowAllowHighDPI                 = C.SDL_WINDOW_ALLOW_HIGHDPI
+	WindowFullscreenDesktop            = C.SDL_WINDOW_FULLSCREEN_DESKTOP
 )
 
-const WindowPosUndefined = 0x1FFF0000
-const WindowPosCentered = 0x2FFF0000
+const WindowPosUndefined = C.SDL_WINDOWPOS_UNDEFINED
+const WindowPosCentered = C.SDL_WINDOWPOS_CENTERED
 
 type Renderer struct {
 	r *C.SDL_Renderer
