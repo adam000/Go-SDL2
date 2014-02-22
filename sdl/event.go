@@ -17,104 +17,102 @@ import (
 
 // START EventType {{{1
 
-// TODO(adam): Suffix with Event instead of Ev?
-
 // EventType represents the type of an application event.
 type EventType uint32
 
 // IsUserEvent reports whether t is a custom application event.
 func (t EventType) IsUserEvent() bool {
-	return t >= UserEvent && t <= LastEvent
+	return t >= UserEventType && t <= LastEventType
 }
 
 // Special event numbers
 const (
-	FirstEvent EventType = C.SDL_FIRSTEVENT
+	FirstEventType EventType = C.SDL_FIRSTEVENT
 
 	// Events UserEvent through LastEvent are for your use, and should be allocated
 	// with RegisterEvents.
-	UserEvent EventType = C.SDL_USEREVENT
-	LastEvent EventType = C.SDL_LASTEVENT
+	UserEventType EventType = C.SDL_USEREVENT
+	LastEventType EventType = C.SDL_LASTEVENT
 )
 
 // Application events
 const (
-	QuitEv EventType = C.SDL_QUIT
+	QuitEventType EventType = C.SDL_QUIT
 
 	// These application events have special meaning on iOS, see README-ios.txt for details
-	AppTerminatingEv         EventType = C.SDL_APP_TERMINATING
-	AppLowMemoryEv           EventType = C.SDL_APP_LOWMEMORY
-	AppWillEnterBackgroundEv EventType = C.SDL_APP_WILLENTERBACKGROUND
-	AppDidEnterBackgroundEv  EventType = C.SDL_APP_DIDENTERBACKGROUND
-	AppWillEnterForegroundEv EventType = C.SDL_APP_WILLENTERFOREGROUND
-	AppDidEnterForegroundEv  EventType = C.SDL_APP_DIDENTERFOREGROUND
+	AppTerminatingEventType         EventType = C.SDL_APP_TERMINATING
+	AppLowMemoryEventType           EventType = C.SDL_APP_LOWMEMORY
+	AppWillEnterBackgroundEventType EventType = C.SDL_APP_WILLENTERBACKGROUND
+	AppDidEnterBackgroundEventType  EventType = C.SDL_APP_DIDENTERBACKGROUND
+	AppWillEnterForegroundEventType EventType = C.SDL_APP_WILLENTERFOREGROUND
+	AppDidEnterForegroundEventType  EventType = C.SDL_APP_DIDENTERFOREGROUND
 )
 
 // Window events
 const (
-	WindowEv EventType = C.SDL_WINDOWEVENT
-	SysWmEv  EventType = C.SDL_SYSWMEVENT
+	WindowEventType EventType = C.SDL_WINDOWEVENT
+	SysWMEventType  EventType = C.SDL_SYSWMEVENT
 )
 
 // Keyboard events
 const (
-	KeyDownEv     EventType = C.SDL_KEYDOWN
-	KeyUpEv       EventType = C.SDL_KEYUP
-	TextEditingEv EventType = C.SDL_TEXTEDITING
-	TextInputEv   EventType = C.SDL_TEXTINPUT
+	KeyDownEventType     EventType = C.SDL_KEYDOWN
+	KeyUpEventType       EventType = C.SDL_KEYUP
+	TextEditingEventType EventType = C.SDL_TEXTEDITING
+	TextInputEventType   EventType = C.SDL_TEXTINPUT
 )
 
 // Mouse events
 const (
-	MouseMotionEv     EventType = C.SDL_MOUSEMOTION
-	MouseButtonDownEv EventType = C.SDL_MOUSEBUTTONDOWN
-	MouseButtonUpEv   EventType = C.SDL_MOUSEBUTTONUP
-	MouseWheelEv      EventType = C.SDL_MOUSEWHEEL
+	MouseMotionEventType     EventType = C.SDL_MOUSEMOTION
+	MouseButtonDownEventType EventType = C.SDL_MOUSEBUTTONDOWN
+	MouseButtonUpEventType   EventType = C.SDL_MOUSEBUTTONUP
+	MouseWheelEventType      EventType = C.SDL_MOUSEWHEEL
 )
 
 // Joystick events
 const (
-	JoyAxisMotionEv    EventType = C.SDL_JOYAXISMOTION
-	JoyBallMotionEv    EventType = C.SDL_JOYBALLMOTION
-	JoyHatMotionEv     EventType = C.SDL_JOYHATMOTION
-	JoyButtonDownEv    EventType = C.SDL_JOYBUTTONDOWN
-	JoyButtonUpEv      EventType = C.SDL_JOYBUTTONUP
-	JoyDeviceAddedEv   EventType = C.SDL_JOYDEVICEADDED
-	JoyDeviceRemovedEv EventType = C.SDL_JOYDEVICEREMOVED
+	JoyAxisMotionEventType    EventType = C.SDL_JOYAXISMOTION
+	JoyBallMotionEventType    EventType = C.SDL_JOYBALLMOTION
+	JoyHatMotionEventType     EventType = C.SDL_JOYHATMOTION
+	JoyButtonDownEventType    EventType = C.SDL_JOYBUTTONDOWN
+	JoyButtonUpEventType      EventType = C.SDL_JOYBUTTONUP
+	JoyDeviceAddedEventType   EventType = C.SDL_JOYDEVICEADDED
+	JoyDeviceRemovedEventType EventType = C.SDL_JOYDEVICEREMOVED
 )
 
 // Game controller events
 const (
-	ControllerAxisMotionEv     EventType = C.SDL_CONTROLLERAXISMOTION
-	ControllerButtonDownEv     EventType = C.SDL_CONTROLLERBUTTONDOWN
-	ControllerButtonUpEv       EventType = C.SDL_CONTROLLERBUTTONUP
-	ControllerDeviceAddedEv    EventType = C.SDL_CONTROLLERDEVICEADDED
-	ControllerDeviceRemovedEv  EventType = C.SDL_CONTROLLERDEVICEREMOVED
-	ControllerDeviceRemappedEv EventType = C.SDL_CONTROLLERDEVICEREMAPPED
+	ControllerAxisMotionEventType     EventType = C.SDL_CONTROLLERAXISMOTION
+	ControllerButtonDownEventType     EventType = C.SDL_CONTROLLERBUTTONDOWN
+	ControllerButtonUpEventType       EventType = C.SDL_CONTROLLERBUTTONUP
+	ControllerDeviceAddedEventType    EventType = C.SDL_CONTROLLERDEVICEADDED
+	ControllerDeviceRemovedEventType  EventType = C.SDL_CONTROLLERDEVICEREMOVED
+	ControllerDeviceRemappedEventType EventType = C.SDL_CONTROLLERDEVICEREMAPPED
 )
 
 // Touch events
 const (
-	FingerDownEv   EventType = C.SDL_FINGERDOWN
-	FingerUpEv     EventType = C.SDL_FINGERUP
-	FingerMotionEv EventType = C.SDL_FINGERMOTION
+	FingerDownEventType   EventType = C.SDL_FINGERDOWN
+	FingerUpEventType     EventType = C.SDL_FINGERUP
+	FingerMotionEventType EventType = C.SDL_FINGERMOTION
 )
 
 // Gesture events
 const (
-	DollarGestureEv EventType = C.SDL_DOLLARGESTURE
-	DollarRecordEv  EventType = C.SDL_DOLLARRECORD
-	MultiGestureEv  EventType = C.SDL_MULTIGESTURE
+	DollarGestureEventType EventType = C.SDL_DOLLARGESTURE
+	DollarRecordEventType  EventType = C.SDL_DOLLARRECORD
+	MultiGestureEventType  EventType = C.SDL_MULTIGESTURE
 )
 
 // Clipboard events
 const (
-	ClipboardUpdateEv EventType = C.SDL_CLIPBOARDUPDATE
+	ClipboardUpdateEventType EventType = C.SDL_CLIPBOARDUPDATE
 )
 
 // Drag and drop events
 const (
-	DropFileEv EventType = C.SDL_DROPFILE
+	DropFileEventType EventType = C.SDL_DROPFILE
 )
 
 // END EventType }}}1
@@ -145,10 +143,10 @@ func HasEvent() bool {
 func convertEvent(cEvent unsafe.Pointer) Event {
 	common := (*C.SDL_CommonEvent)(cEvent)
 	switch EventType(common._type) {
-	case QuitEv:
+	case QuitEventType:
 		// Quit events don't hold any data beyond the common events.
 		return commonEvent{common}
-	case KeyDownEv, KeyUpEv:
+	case KeyDownEventType, KeyUpEventType:
 		return KeyboardEvent{(*C.SDL_KeyboardEvent)(cEvent)}
 	default:
 		fmt.Println("Unhandled event with int:", int(common._type))
