@@ -6,7 +6,7 @@ package sdl
 import "C"
 
 type GLContext struct {
-	c *C.SDL_GLContext
+	c C.SDL_GLContext
 }
 
 func NewGLContext(w Window) (GLContext, error) {
@@ -14,11 +14,11 @@ func NewGLContext(w Window) (GLContext, error) {
 	if context == nil {
 		return GLContext{}, GetError()
 	}
-	return GLContext{&context}, nil
+	return GLContext{context}, nil
 }
 
 func (c GLContext) Destroy() {
-	C.SDL_GL_DeleteContext(*c.c)
+	C.SDL_GL_DeleteContext(c.c)
 }
 
 func (w Window) GLSwap() {
