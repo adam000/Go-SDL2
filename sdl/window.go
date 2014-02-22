@@ -1,8 +1,5 @@
 package sdl
 
-// #cgo pkg-config: sdl2
-// #cgo LDFLAGS: -lSDL2_image
-//
 // #include "SDL.h"
 import "C"
 
@@ -70,7 +67,7 @@ func NewWindow(title string, x, y, w, h int, flags WindowFlag) (Window, error) {
 		return Window{window, nil}, nil
 	}
 
-	return Window{}, getError()
+	return Window{}, GetError()
 }
 
 // Get the window's surface
@@ -89,13 +86,13 @@ func NewRenderer(window Window, index int, flags uint32) (Renderer, error) {
 		return Renderer{r}, nil
 	}
 
-	return Renderer{}, getError()
+	return Renderer{}, GetError()
 }
 
 func (w Window) Renderer() (Renderer, error) {
 	r := C.SDL_GetRenderer(w.w)
 	if r == nil {
-		return Renderer{}, getError()
+		return Renderer{}, GetError()
 	}
 	return Renderer{r}, nil
 }
@@ -103,7 +100,7 @@ func (w Window) Renderer() (Renderer, error) {
 func (r Renderer) Info() (*RendererInfo, error) {
 	var info C.SDL_RendererInfo
 	if C.SDL_GetRendererInfo(r.r, &info) != 0 {
-		return nil, getError()
+		return nil, GetError()
 	}
 
 	formats := make([]PixelFormatEnum, info.num_texture_formats)
@@ -135,7 +132,7 @@ func (r Renderer) CopyTexture(texture Texture, srcRect *Rect, destRect *Rect) er
 	}
 
 	if C.SDL_RenderCopy(r.r, texture.t, src, dest) != 0 {
-		return getError()
+		return GetError()
 	}
 	return nil
 }
@@ -143,7 +140,7 @@ func (r Renderer) CopyTexture(texture Texture, srcRect *Rect, destRect *Rect) er
 // Clear clears the current rendering target with the drawing color.
 func (r Renderer) Clear() error {
 	if C.SDL_RenderClear(r.r) != 0 {
-		return getError()
+		return GetError()
 	}
 	return nil
 }

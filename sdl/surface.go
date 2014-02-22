@@ -1,8 +1,5 @@
 package sdl
 
-// #cgo pkg-config: sdl2
-// #cgo LDFLAGS: -lSDL2_image
-//
 // #include "SDL.h"
 import "C"
 
@@ -12,8 +9,15 @@ import (
 	"unsafe"
 )
 
+// Surface is a rectangular array of pixels.
 type Surface struct {
 	s *C.SDL_Surface
+}
+
+// InternalSurface creates a surface from an SDL_Surface pointer.
+// This should only be used by other SDL packages.
+func InternalSurface(p unsafe.Pointer) Surface {
+	return Surface{(*C.SDL_Surface)(p)}
 }
 
 // PixelFormat returns the surface's pixel format.
@@ -31,7 +35,7 @@ func (surface Surface) PixelFormat() *PixelFormat {
 
 func (surface Surface) PixelData() (PixelData, error) {
 	if result := C.SDL_LockSurface(surface.s); result < 0 {
-		return PixelData{}, getError()
+		return PixelData{}, GetError()
 	}
 	return PixelData{s: surface.s}, nil
 }
@@ -40,7 +44,7 @@ func (surface Surface) PixelData() (PixelData, error) {
 func (surface Surface) ToTexture(renderer Renderer) (Texture, error) {
 	txt := C.SDL_CreateTextureFromSurface(renderer.r, surface.s)
 	if txt == nil {
-		return Texture{}, getError()
+		return Texture{}, GetError()
 	}
 	return Texture{txt}, nil
 }

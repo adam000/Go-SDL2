@@ -1,8 +1,7 @@
-// Package sdl provides a binding of SDL2 and SDL2_image with an object-oriented twist.
+// Package sdl provides a binding of SDL2 with an object-oriented twist.
 package sdl
 
 // #cgo pkg-config: sdl2
-// #cgo LDFLAGS: -lSDL2_image
 //
 // #include "SDL.h"
 import "C"
@@ -32,7 +31,7 @@ func Init(flags ...InitFlag) error {
 		f |= flags[i]
 	}
 	if C.SDL_Init(C.Uint32(f)) != 0 {
-		return getError()
+		return GetError()
 	}
 	return nil
 }
@@ -49,8 +48,10 @@ func (e Error) Error() string {
 	return "sdl: " + string(e)
 }
 
-// getError returns the current SDL error as a Go error value.
-func getError() error {
+// GetError returns the current SDL error as a Go error value.
+// This is internal to SDL but exported because it is cross-package.
+func GetError() error {
+	// TODO(light): synchronize access?
 	e := C.SDL_GetError()
 	if *e == 0 {
 		// empty string, no error.
