@@ -3,42 +3,6 @@ package sdl
 // #cgo pkg-config: sdl2
 //
 // #include "SDL.h"
-//
-// static Uint32 goSDL_pixelFlag(Uint32 pixelFormat) {
-//   return SDL_PIXELFLAG(pixelFormat);
-// }
-//
-// static Uint32 goSDL_pixelType(Uint32 pixelFormat) {
-//   return SDL_PIXELTYPE(pixelFormat);
-// }
-//
-// static Uint32 goSDL_pixelOrder(Uint32 pixelFormat) {
-//   return SDL_PIXELORDER(pixelFormat);
-// }
-//
-// static Uint32 goSDL_pixelLayout(Uint32 pixelFormat) {
-//   return SDL_PIXELLAYOUT(pixelFormat);
-// }
-//
-// static Uint32 goSDL_bitsPerPixel(Uint32 pixelFormat) {
-//   return SDL_BITSPERPIXEL(pixelFormat);
-// }
-//
-// static Uint32 goSDL_bytesPerPixel(Uint32 pixelFormat) {
-//   return SDL_BYTESPERPIXEL(pixelFormat);
-// }
-//
-// static Uint32 goSDL_isPixelFormatIndexed(Uint32 pixelFormat) {
-//   return SDL_ISPIXELFORMAT_INDEXED(pixelFormat);
-// }
-//
-// static Uint32 goSDL_isPixelFormatAlpha(Uint32 pixelFormat) {
-//   return SDL_ISPIXELFORMAT_ALPHA(pixelFormat);
-// }
-//
-// static Uint32 goSDL_isPixelFormatFourCC(Uint32 pixelFormat) {
-//   return SDL_ISPIXELFORMAT_FOURCC(pixelFormat);
-// }
 import "C"
 
 // PixelFormat describes a surface's pixel memory format.
@@ -54,31 +18,45 @@ type PixelFormat struct {
 // PixelFormatEnum describes the method of storing pixel data.
 type PixelFormatEnum uint32
 
-// PixelType returns the data type used for the pixel format.
-func (pf PixelFormatEnum) PixelType() PixelType {
-	return PixelType(C.goSDL_pixelType(C.Uint32(pf)))
+// Inlining the SDL_PIXEL* macros is somewhat susceptible to changes
+// in SDL, but the potential inlining benefit outweighs this.
+
+func (pf PixelFormatEnum) flag() uint32 {
+	return uint32(pf >> 28 & 0x0f)
 }
 
-// PixelOrder returns the ordering of channels in the pixel format.
-func (pf PixelFormatEnum) PixelOrder() PixelOrder {
-	return PixelOrder(C.goSDL_pixelOrder(C.Uint32(pf)))
+// Type returns the data type used for the pixel format.
+func (pf PixelFormatEnum) Type() PixelType {
+	return PixelType(pf >> 24 & 0x0f)
 }
 
-// PixelLayout returns the layout of channels in a packed pixel format.
-func (pf PixelFormatEnum) PixelLayout() PixelLayout {
-	return PixelLayout(C.goSDL_pixelLayout(C.Uint32(pf)))
+// Order returns the ordering of channels in the pixel format.
+func (pf PixelFormatEnum) Order() PixelOrder {
+	return PixelOrder(pf >> 20 & 0x0f)
+}
+
+// Layout returns the layout of channels in a packed pixel format.
+func (pf PixelFormatEnum) Layout() PixelLayout {
+	return PixelLayout(pf >> 16 & 0x0f)
 }
 
 // BitsPerPixel returns the number of significant bits in a pixel value
 // stored in this format.
 func (pf PixelFormatEnum) BitsPerPixel() int {
-	return int(C.goSDL_bitsPerPixel(C.Uint32(pf)))
+	return int(pf >> 8 & 0xff)
 }
 
 // BytesPerPixel returns the number of bytes required to hold a
 // pixel value stored in this format.
 func (pf PixelFormatEnum) BytesPerPixel() int {
-	return int(C.goSDL_bytesPerPixel(C.Uint32(pf)))
+	switch pf {
+	case PixelFormatYUY2, PixelFormatUYVY, PixelFormatYVYU:
+		return 2
+	case PixelFormatYV12, PixelFormatIYUV:
+		return 1
+	default:
+		return int(pf & 0xff)
+	}
 }
 
 // String returns the SDL constant name of the pixel format.
@@ -88,18 +66,25 @@ func (pf PixelFormatEnum) String() string {
 
 // IsIndexed reports whether the pixel format has a palette.
 func (pf PixelFormatEnum) IsIndexed() bool {
-	return C.goSDL_isPixelFormatIndexed(C.Uint32(pf)) != 0
+	t := pf.Type()
+	return !pf.IsFourCC() &&
+		(t == PixelTypeIndex1 || t == PixelTypeIndex4 || t == PixelTypeIndex8)
 }
 
 // IsAlpha reports whether the pixel format has an alpha channel.
 func (pf PixelFormatEnum) IsAlpha() bool {
-	return C.goSDL_isPixelFormatAlpha(C.Uint32(pf)) != 0
+	order := pf.Order()
+	return !pf.IsFourCC() &&
+		(order == PackedOrderARGB ||
+			order == PackedOrderRGBA ||
+			order == PackedOrderABGR ||
+			order == PackedOrderBGRA)
 }
 
 // IsFourCC reports whether the pixel format is a four-character code,
 // like YUV.
 func (pf PixelFormatEnum) IsFourCC() bool {
-	return C.goSDL_isPixelFormatFourCC(C.Uint32(pf)) != 0
+	return pf != 0 && pf.flag() != 1
 }
 
 // Defined pixel formats.
@@ -143,7 +128,7 @@ const (
 )
 
 // PixelType is a pixel format's data type.
-type PixelType uint32
+type PixelType uint8
 
 // Pixel types.
 const (
@@ -162,7 +147,7 @@ const (
 )
 
 // PixelOrder is a pixel format's channel order.
-type PixelOrder uint32
+type PixelOrder uint8
 
 // Bitmap pixel order, high bit -> low bit.
 const (
@@ -196,7 +181,7 @@ const (
 )
 
 // PixelLayout is a packed pixel format's channel bit layout.
-type PixelLayout uint32
+type PixelLayout uint8
 
 // Packed channel layouts.
 const (
