@@ -16,6 +16,19 @@ type Surface struct {
 	s *C.SDL_Surface
 }
 
+// PixelFormat returns the surface's pixel format.
+func (surface Surface) PixelFormat() *PixelFormat {
+	return &PixelFormat{
+		Format:        PixelFormatEnum(surface.s.format.format),
+		BitsPerPixel:  uint8(surface.s.format.BitsPerPixel),
+		BytesPerPixel: uint8(surface.s.format.BytesPerPixel),
+		Rmask:         uint32(surface.s.format.Rmask),
+		Gmask:         uint32(surface.s.format.Gmask),
+		Bmask:         uint32(surface.s.format.Bmask),
+		Amask:         uint32(surface.s.format.Amask),
+	}
+}
+
 func (surface Surface) PixelData() (PixelData, error) {
 	if result := C.SDL_LockSurface(surface.s); result < 0 {
 		return PixelData{}, getError()

@@ -41,6 +41,16 @@ package sdl
 // }
 import "C"
 
+// PixelFormat describes a surface's pixel memory format.
+type PixelFormat struct {
+	Format PixelFormatEnum
+	// TODO(light): palette
+	BitsPerPixel  uint8
+	BytesPerPixel uint8
+
+	Rmask, Gmask, Bmask, Amask uint32
+}
+
 // PixelFormatEnum describes the method of storing pixel data.
 type PixelFormatEnum uint32
 
