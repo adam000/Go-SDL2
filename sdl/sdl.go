@@ -1,8 +1,7 @@
-// Package sdl provides a binding of SDL2 and SDL2_image with an object-oriented twist.
+// Package sdl provides a binding of SDL2 with an object-oriented twist.
 package sdl
 
 // #cgo pkg-config: sdl2
-// #cgo LDFLAGS: -lSDL2_image
 //
 // #include "SDL.h"
 import "C"
