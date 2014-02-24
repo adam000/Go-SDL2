@@ -48,8 +48,8 @@ func init() {
 
 // Main runs the main SDL service loop.
 // The binary's main.main must call sdl.Main() to run this loop.
-// Main does not return.  If the binary needs to do other work, it
-// must do it in separate goroutines.
+// If the binary needs to do other work, it must do it in separate goroutines.
+// Main will return after calling Quit.
 func Main() {
 	// Taken from https://code.google.com/p/go-wiki/wiki/LockOSThread.
 	for f := range mainFunc {
@@ -101,9 +101,10 @@ func Init(flags ...InitFlag) error {
 	return nil
 }
 
-// Quit cleans up SDL.
+// Quit cleans up SDL.  Main will return after calling Quit.
 func Quit() {
 	C.SDL_Quit()
+	close(mainFunc)
 }
 
 // Error stores an SDL error.
