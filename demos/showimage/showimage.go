@@ -14,7 +14,14 @@ var fullscreen = flag.Bool("fullscreen", false, "fullscreen window")
 
 func main() {
 	flag.Parse()
+	go sdl.Do(run)
+	sdl.Main()
+}
+
+func run() {
 	defer sdl.Quit()
+
+	sdl.Init(sdl.InitVideo)
 
 	// Open window
 	var windowFlags sdl.WindowFlag
@@ -64,10 +71,10 @@ mainLoop:
 				break
 			}
 			switch ev.Type() {
-			case sdl.QuitEv:
+			case sdl.QuitEventType:
 				fmt.Println("QUIT")
 				break mainLoop
-			case sdl.KeyDownEv:
+			case sdl.KeyDownEventType:
 				fmt.Println("KEY")
 				// TODO(light): advance texture
 			}
