@@ -121,17 +121,8 @@ func (r Renderer) Destroy() {
 }
 
 // SDL_RenderCopy
-func (r Renderer) CopyTexture(texture Texture, srcRect *Rect, destRect *Rect) error {
-	var src *C.SDL_Rect
-	var dest *C.SDL_Rect
-	if srcRect != nil {
-		src = srcRect.toCRect()
-	}
-	if destRect != nil {
-		dest = destRect.toCRect()
-	}
-
-	if C.SDL_RenderCopy(r.r, texture.t, src, dest) != 0 {
+func (r Renderer) CopyTexture(texture Texture, srcRect, destRect *Rectangle) error {
+	if C.SDL_RenderCopy(r.r, texture.t, srcRect.toCRect(), destRect.toCRect()) != 0 {
 		return GetError()
 	}
 	return nil
