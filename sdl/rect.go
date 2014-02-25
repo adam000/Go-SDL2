@@ -48,6 +48,11 @@ func (r Rectangle) String() string {
 	return fmt.Sprintf("%v %dx%d", r.Origin, r.W, r.H)
 }
 
+// IsEmpty reports whether width <= 0 or height <= 0.
+func (r Rectangle) IsEmpty() bool {
+	return r.W <= 0 || r.H <= 0
+}
+
 func (r *Rectangle) toCRect() *C.SDL_Rect {
 	if r == nil {
 		return nil
