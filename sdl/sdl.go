@@ -37,6 +37,7 @@ import (
 )
 
 func init() {
+	// Force main to stay on main thread.
 	runtime.LockOSThread()
 
 	// Run SDL_Init as early as possible. The SDL wiki claims that creating threads
