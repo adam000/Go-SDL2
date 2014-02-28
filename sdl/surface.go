@@ -33,6 +33,11 @@ func (surface Surface) PixelFormat() *PixelFormat {
 	}
 }
 
+// Size returns the surface's width and height.
+func (surface Surface) Size() Point {
+	return Point{int(surface.s.w), int(surface.s.h)}
+}
+
 func (surface Surface) PixelData() (PixelData, error) {
 	if result := C.SDL_LockSurface(surface.s); result < 0 {
 		return PixelData{}, GetError()
