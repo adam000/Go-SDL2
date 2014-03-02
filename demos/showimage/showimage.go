@@ -23,7 +23,7 @@ func main() {
 	go sdl.Do(func() { err = run() })
 	sdl.Main()
 
-	if err := run(); err != nil {
+	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
