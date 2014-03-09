@@ -145,6 +145,8 @@ func convertEvent(cEvent unsafe.Pointer) Event {
 		return commonEvent{common}
 	case KeyDownEventType, KeyUpEventType:
 		return KeyboardEvent{(*C.SDL_KeyboardEvent)(cEvent)}
+	case WindowEventType:
+		return WindowEvent{(*C.SDL_WindowEvent)(cEvent)}
 	default:
 		fmt.Println("Unhandled event with int:", int(common._type))
 		return commonEvent{common}
@@ -172,36 +174,85 @@ func (e commonEvent) Timestamp() uint32 {
 // }}}2 CommonEvent
 
 // {{{2 WindowEvent
-// TODO make this implement Event
+
+// WindowEvent holds window state change event data.
 type WindowEvent struct {
-	ev C.SDL_WindowEvent
+	ev *C.SDL_WindowEvent
 }
+
+// Type returns WindowEventType.
+func (e WindowEvent) Type() EventType {
+	return WindowEventType
+}
+
+func (e WindowEvent) Timestamp() uint32 {
+	return uint32(e.ev.timestamp)
+}
+
+// WindowID returns the ID of the window that this event occurred in.
+func (e WindowEvent) WindowID() uint32 {
+	return uint32(e.ev.windowID)
+}
+
+// WindowEvent returns the specific state change that occurred on the window.
+func (e WindowEvent) WindowEvent() WindowEventID {
+	return WindowEventID(e.ev.event)
+}
+
+// Data returns the event-dependent data.
+// For move events, this is the new (x, y) position of the window.
+// For resize events, this is the new window size.
+func (e WindowEvent) Data() (data1, data2 int32) {
+	return int32(e.ev.data1), int32(e.ev.data2)
+}
+
+// WindowEventID is a window event subtype.
+type WindowEventID uint8
+
+// Window event subtypes
+const (
+	WindowEventShown       WindowEventID = C.SDL_WINDOWEVENT_SHOWN
+	WindowEventHidden      WindowEventID = C.SDL_WINDOWEVENT_HIDDEN
+	WindowEventExposed     WindowEventID = C.SDL_WINDOWEVENT_EXPOSED
+	WindowEventMoved       WindowEventID = C.SDL_WINDOWEVENT_MOVED
+	WindowEventResized     WindowEventID = C.SDL_WINDOWEVENT_RESIZED
+	WindowEventSizeChanged WindowEventID = C.SDL_WINDOWEVENT_SIZE_CHANGED
+	WindowEventMinimized   WindowEventID = C.SDL_WINDOWEVENT_MINIMIZED
+	WindowEventMaximized   WindowEventID = C.SDL_WINDOWEVENT_MAXIMIZED
+	WindowEventRestored    WindowEventID = C.SDL_WINDOWEVENT_RESTORED
+	WindowEventEnter       WindowEventID = C.SDL_WINDOWEVENT_ENTER
+	WindowEventLeave       WindowEventID = C.SDL_WINDOWEVENT_LEAVE
+	WindowEventFocusGained WindowEventID = C.SDL_WINDOWEVENT_FOCUS_GAINED
+	WindowEventFocusLost   WindowEventID = C.SDL_WINDOWEVENT_FOCUS_LOST
+	WindowEventClose       WindowEventID = C.SDL_WINDOWEVENT_CLOSE
+)
 
 // }}}2 WindowEvent
 
 // {{{2 KeyboardEvent
 type KeyboardEvent struct {
-	e *C.SDL_KeyboardEvent
+	ev *C.SDL_KeyboardEvent
 }
 
 func (e KeyboardEvent) Timestamp() uint32 {
-	return uint32(e.e.timestamp)
+	return uint32(e.ev.timestamp)
 }
 
 func (e KeyboardEvent) Type() EventType {
-	return EventType(e.e._type)
+	return EventType(e.ev._type)
 }
 
 func (e KeyboardEvent) WindowID() uint32 {
-	return uint32(e.e.windowID)
+	return uint32(e.ev.windowID)
 }
 
 func (e KeyboardEvent) State() uint8 {
-	return uint8(e.e.state)
+	return uint8(e.ev.state)
 }
 
-func (e KeyboardEvent) Repeat() uint8 {
-	return uint8(e.e.repeat)
+// IsRepeat reports whether this event is a repeating key.
+func (e KeyboardEvent) IsRepeat() bool {
+	return e.ev.repeat != 0
 }
 
 // TODO this
