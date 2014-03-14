@@ -279,9 +279,44 @@ type TextInputEvent struct {
 // }}}2 TextInputEvent
 
 // {{{2 MouseMotionEvent
-// TODO make this implement Event
+
+// MouseMotionEvent holds a mouse movement event.
 type MouseMotionEvent struct {
-	ev C.SDL_MouseMotionEvent
+	ev *C.SDL_MouseMotionEvent
+}
+
+// Type returns MouseMotionEventType
+func (e MouseMotionEvent) Type() EventType {
+	return EventType(e.ev._type)
+}
+
+func (e MouseMotionEvent) Timestamp() uint32 {
+	return uint32(e.ev.timestamp)
+}
+
+// WindowID returns the window with mouse focus, or zero if no window has focus.
+func (e MouseMotionEvent) WindowID() uint32 {
+	return uint32(e.ev.windowID)
+}
+
+// Which returns the mouse which triggered the event.
+func (e MouseMotionEvent) Which() uint32 {
+	return uint32(e.ev.which)
+}
+
+// ButtonState returns a bitmask of the current button state.  Use MouseButton.Mask
+func (e MouseMotionEvent) ButtonState() uint32 {
+	return uint32(e.ev.state)
+}
+
+// Position returns the new (x, y) coordinate of the event, relative to the window.
+func (e MouseMotionEvent) Position() (x, y int32) {
+	return int32(e.ev.x), int32(e.ev.y)
+}
+
+// Delta returns the relative (x, y) motion captured by this event.
+func (e MouseMotionEvent) Delta() (dx, dy int32) {
+	return int32(e.ev.xrel), int32(e.ev.yrel)
 }
 
 // }}}2 MouseMotionEvent
@@ -338,18 +373,6 @@ func (e MouseButtonEvent) IsPressed() bool {
 func (e MouseButtonEvent) Position() (x, y int32) {
 	return int32(e.ev.x), int32(e.ev.y)
 }
-
-// MouseButton is an enumeration of mouse buttons.
-type MouseButton uint8
-
-// Common mouse buttons
-const (
-	LeftMouseButton MouseButton = C.SDL_BUTTON_LEFT
-	MiddleMouseButton MouseButton = C.SDL_BUTTON_MIDDLE
-	RightMouseButton MouseButton = C.SDL_BUTTON_RIGHT
-	X1MouseButton MouseButton = C.SDL_BUTTON_X1
-	X2MouseButton MouseButton = C.SDL_BUTTON_X2
-)
 
 // }}}2 MouseButtonEvent
 
