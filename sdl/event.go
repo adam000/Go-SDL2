@@ -147,6 +147,10 @@ func convertEvent(cEvent unsafe.Pointer) Event {
 		return KeyboardEvent{(*C.SDL_KeyboardEvent)(cEvent)}
 	case WindowEventType:
 		return WindowEvent{(*C.SDL_WindowEvent)(cEvent)}
+	case MouseMotionEventType:
+		return MouseMotionEvent{(*C.SDL_MouseMotionEvent)(cEvent)}
+	case MouseButtonDownEventType, MouseButtonUpEventType:
+		return MouseButtonEvent{(*C.SDL_MouseButtonEvent)(cEvent)}
 	default:
 		fmt.Println("Unhandled event with int:", int(common._type))
 		return commonEvent{common}
