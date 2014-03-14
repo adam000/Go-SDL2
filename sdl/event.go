@@ -151,6 +151,8 @@ func convertEvent(cEvent unsafe.Pointer) Event {
 		return MouseMotionEvent{(*C.SDL_MouseMotionEvent)(cEvent)}
 	case MouseButtonDownEventType, MouseButtonUpEventType:
 		return MouseButtonEvent{(*C.SDL_MouseButtonEvent)(cEvent)}
+	case MouseWheelEventType:
+		return MouseWheelEvent{(*C.SDL_MouseWheelEvent)(cEvent)}
 	default:
 		fmt.Println("Unhandled event with int:", int(common._type))
 		return commonEvent{common}
@@ -381,9 +383,34 @@ func (e MouseButtonEvent) Position() (x, y int32) {
 // }}}2 MouseButtonEvent
 
 // {{{2 MouseWheelEvent
-// TODO make this implement Event
+
+// MouseWheelEvent holds a mouse wheel movement event.
 type MouseWheelEvent struct {
-	ev C.SDL_MouseWheelEvent
+	ev *C.SDL_MouseWheelEvent
+}
+
+// Type returns MouseWheelEventType.
+func (e MouseWheelEvent) Type() EventType {
+	return EventType(e.ev._type)
+}
+
+func (e MouseWheelEvent) Timestamp() uint32 {
+	return uint32(e.ev.timestamp)
+}
+
+// WindowID returns the window with mouse focus, or zero if no window has focus.
+func (e MouseWheelEvent) WindowID() uint32 {
+	return uint32(e.ev.windowID)
+}
+
+// Which returns the mouse which triggered the event.
+func (e MouseWheelEvent) Which() uint32 {
+	return uint32(e.ev.which)
+}
+
+// Scroll returns the amount scrolled in X and Y.  The axes increase right and up.
+func (e MouseWheelEvent) Scroll() (x, y int32) {
+	return int32(e.ev.x), int32(e.ev.y)
 }
 
 // }}}2 MouseWheelEvent
