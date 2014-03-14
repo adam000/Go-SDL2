@@ -153,6 +153,16 @@ func convertEvent(cEvent unsafe.Pointer) Event {
 		return MouseButtonEvent{(*C.SDL_MouseButtonEvent)(cEvent)}
 	case MouseWheelEventType:
 		return MouseWheelEvent{(*C.SDL_MouseWheelEvent)(cEvent)}
+	case JoyAxisMotionEventType:
+		return JoyAxisEvent{(*C.SDL_JoyAxisEvent)(cEvent)}
+	case JoyBallMotionEventType:
+		return JoyBallEvent{(*C.SDL_JoyBallEvent)(cEvent)}
+	case JoyHatMotionEventType:
+		return JoyHatEvent{(*C.SDL_JoyHatEvent)(cEvent)}
+	case JoyButtonDownEventType, JoyButtonUpEventType:
+		return JoyButtonEvent{(*C.SDL_JoyButtonEvent)(cEvent)}
+	case JoyDeviceAddedEventType, JoyDeviceRemovedEventType:
+		return JoyDeviceEvent{(*C.SDL_JoyDeviceEvent)(cEvent)}
 	default:
 		fmt.Println("Unhandled event with int:", int(common._type))
 		return commonEvent{common}
@@ -416,114 +426,337 @@ func (e MouseWheelEvent) Scroll() (x, y int32) {
 // }}}2 MouseWheelEvent
 
 // {{{2 JoyAxisEvent
-// TODO make this implement Event
+
+// JoyAxisEvent holds a joystick axis movement event.
 type JoyAxisEvent struct {
-	ev C.SDL_JoyAxisEvent
+	ev *C.SDL_JoyAxisEvent
+}
+
+// Type returns JoyAxisMotionEventType.
+func (e JoyAxisEvent) Type() EventType {
+	return EventType(e.ev._type)
+}
+
+func (e JoyAxisEvent) Timestamp() uint32 {
+	return uint32(e.ev.timestamp)
+}
+
+// Which returns the joystick which triggered the event.
+func (e JoyAxisEvent) Which() JoystickID {
+	return JoystickID(e.ev.which)
+}
+
+// Axis returns the index of the axis that changed.
+func (e JoyAxisEvent) Axis() uint8 {
+	return uint8(e.ev.axis)
+}
+
+// Value returns the current position of the axis.
+func (e JoyAxisEvent) Value() int16 {
+	return int16(e.ev.value)
 }
 
 // }}}2 JoyAxisEvent
 
 // {{{2 JoyBallEvent
-// TODO make this implement Event
+
+// JoyBallEvent holds a joystick trackball motion event.
 type JoyBallEvent struct {
-	ev C.SDL_JoyBallEvent
+	ev *C.SDL_JoyBallEvent
+}
+
+// Type returns JoyBallMotionEventType.
+func (e JoyBallEvent) Type() EventType {
+	return EventType(e.ev._type)
+}
+
+func (e JoyBallEvent) Timestamp() uint32 {
+	return uint32(e.ev.timestamp)
+}
+
+// Which returns the joystick which triggered the event.
+func (e JoyBallEvent) Which() JoystickID {
+	return JoystickID(e.ev.which)
+}
+
+// Ball returns the index of the trackball that changed.
+func (e JoyBallEvent) Ball() uint8 {
+	return uint8(e.ev.ball)
+}
+
+// Delta returns the relative (x, y) motion captured by this event.
+func (e JoyBallEvent) Delta() (dx, dy int16) {
+	return int16(e.ev.xrel), int16(e.ev.yrel)
 }
 
 // }}}2 JoyBallEvent
 
 // {{{2 JoyHatEvent
-// TODO make this implement Event
+
+// JoyHatEvent holds a EVENT
 type JoyHatEvent struct {
-	ev C.SDL_JoyHatEvent
+	ev *C.SDL_JoyHatEvent
+}
+
+// Type returns JoyHatMotionEventType.
+func (e JoyHatEvent) Type() EventType {
+	return EventType(e.ev._type)
+}
+
+func (e JoyHatEvent) Timestamp() uint32 {
+	return uint32(e.ev.timestamp)
+}
+
+// Which returns the joystick which triggered the event.
+func (e JoyHatEvent) Which() JoystickID {
+	return JoystickID(e.ev.which)
+}
+
+// Hat returns the index of the hat that changed.
+func (e JoyHatEvent) Hat() uint8 {
+	return uint8(e.ev.hat)
+}
+
+// Position returns the new position of the hat.
+func (e JoyHatEvent) Position() HatPosition {
+	return HatPosition(e.ev.value)
 }
 
 // }}}2 JoyHatEvent
 
 // {{{2 JoyButtonEvent
-// TODO make this implement Event
+
+// JoyButtonEvent holds a EVENT
 type JoyButtonEvent struct {
-	ev C.SDL_JoyButtonEvent
+	ev *C.SDL_JoyButtonEvent
+}
+
+// Type returns either JoyButtonDownEventType or JoyButtonUpEventType.
+func (e JoyButtonEvent) Type() EventType {
+	return EventType(e.ev._type)
+}
+
+func (e JoyButtonEvent) Timestamp() uint32 {
+	return uint32(e.ev.timestamp)
+}
+
+// Which returns the joystick which triggered the event.
+func (e JoyButtonEvent) Which() JoystickID {
+	return JoystickID(e.ev.which)
+}
+
+// Button returns the index of the button that changed.
+func (e JoyButtonEvent) Button() uint8 {
+	return uint8(e.ev.button)
+}
+
+// IsPressed reports whether the button is pressed.
+func (e JoyButtonEvent) IsPressed() bool {
+	return e.ev.state == C.SDL_PRESSED
 }
 
 // }}}2 JoyButtonEvent
 
 // {{{2 JoyDeviceEvent
-// TODO make this implement Event
+
+// JoyDeviceEvent holds a joystick connection or disconnection event.
 type JoyDeviceEvent struct {
-	ev C.SDL_JoyDeviceEvent
+	ev *C.SDL_JoyDeviceEvent
+}
+
+// Type returns either JoyDeviceAddedEventType or JoyDeviceRemovedEventType.
+func (e JoyDeviceEvent) Type() EventType {
+	return EventType(e.ev._type)
+}
+
+func (e JoyDeviceEvent) Timestamp() uint32 {
+	return uint32(e.ev.timestamp)
+}
+
+// Which returns the joystick device index for an added event or the instance ID for a removal event.
+func (e JoyDeviceEvent) Which() int32 {
+	return int32(e.ev.which)
 }
 
 // }}}2 JoyDeviceEvent
 
 // {{{2 ControllerAxisEvent
-// TODO make this implement Event
+
+// ControllerAxisEvent holds a EVENT
 type ControllerAxisEvent struct {
-	ev C.SDL_ControllerAxisEvent
+	ev *C.SDL_ControllerAxisEvent
 }
+
+// Type returns...
+func (e ControllerAxisEvent) Type() EventType {
+	return EventType(e.ev._type)
+}
+
+func (e ControllerAxisEvent) Timestamp() uint32 {
+	return uint32(e.ev.timestamp)
+}
+
+// TODO(light)
 
 // }}}2 ControllerAxisEvent
 
 // {{{2 ControllerButtonEvent
-// TODO make this implement Event
+
+// ControllerButtonEvent holds a EVENT
 type ControllerButtonEvent struct {
-	ev C.SDL_ControllerButtonEvent
+	ev *C.SDL_ControllerButtonEvent
 }
+
+// Type returns...
+func (e ControllerButtonEvent) Type() EventType {
+	return EventType(e.ev._type)
+}
+
+func (e ControllerButtonEvent) Timestamp() uint32 {
+	return uint32(e.ev.timestamp)
+}
+
+// TODO(light)
 
 // }}}2 ControllerButtonEvent
 
 // {{{2 ControllerDeviceEvent
-// TODO make this implement Event
+
+// ControllerDeviceEvent holds a EVENT
 type ControllerDeviceEvent struct {
-	ev C.SDL_ControllerDeviceEvent
+	ev *C.SDL_ControllerDeviceEvent
 }
+
+// Type returns...
+func (e ControllerDeviceEvent) Type() EventType {
+	return EventType(e.ev._type)
+}
+
+func (e ControllerDeviceEvent) Timestamp() uint32 {
+	return uint32(e.ev.timestamp)
+}
+
+// TODO(light)
 
 // }}}2 ControllerDeviceEvent
 
 // {{{2 UserEvent
-// TODO make this implement Event
+
+// UserEvent holds a EVENT
 type UserEvent struct {
-	ev C.SDL_UserEvent
+	ev *C.SDL_UserEvent
 }
+
+// Type returns...
+func (e UserEvent) Type() EventType {
+	return EventType(e.ev._type)
+}
+
+func (e UserEvent) Timestamp() uint32 {
+	return uint32(e.ev.timestamp)
+}
+
+// TODO(light)
 
 // }}}2 UserEvent
 
 // {{{2 SysWMEvent
-// TODO make this implement Event
+
+// SysWMEvent holds a EVENT
 type SysWMEvent struct {
-	ev C.SDL_SysWMEvent
+	ev *C.SDL_SysWMEvent
 }
+
+// Type returns...
+func (e SysWMEvent) Type() EventType {
+	return EventType(e.ev._type)
+}
+
+func (e SysWMEvent) Timestamp() uint32 {
+	return uint32(e.ev.timestamp)
+}
+
+// TODO(light)
 
 // }}}2 SysWMEvent
 
 // {{{2 TouchFingerEvent
-// TODO make this implement Event
+
+// TouchFingerEvent holds a EVENT
 type TouchFingerEvent struct {
-	ev C.SDL_TouchFingerEvent
+	ev *C.SDL_TouchFingerEvent
 }
+
+// Type returns...
+func (e TouchFingerEvent) Type() EventType {
+	return EventType(e.ev._type)
+}
+
+func (e TouchFingerEvent) Timestamp() uint32 {
+	return uint32(e.ev.timestamp)
+}
+
+// TODO(light)
 
 // }}}2 TouchFingerEvent
 
 // {{{2 MultiGestureEvent
-// TODO make this implement Event
+
+// MultiGestureEvent holds a EVENT
 type MultiGestureEvent struct {
-	ev C.SDL_MultiGestureEvent
+	ev *C.SDL_MultiGestureEvent
 }
+
+// Type returns...
+func (e MultiGestureEvent) Type() EventType {
+	return EventType(e.ev._type)
+}
+
+func (e MultiGestureEvent) Timestamp() uint32 {
+	return uint32(e.ev.timestamp)
+}
+
+// TODO(light)
 
 // }}}2 MultiGestureEvent
 
 // {{{2 DollarGestureEvent
-// TODO make this implement Event
+
+// DollarGestureEvent holds a EVENT
 type DollarGestureEvent struct {
-	ev C.SDL_DollarGestureEvent
+	ev *C.SDL_DollarGestureEvent
 }
+
+// Type returns...
+func (e DollarGestureEvent) Type() EventType {
+	return EventType(e.ev._type)
+}
+
+func (e DollarGestureEvent) Timestamp() uint32 {
+	return uint32(e.ev.timestamp)
+}
+
+// TODO(light)
 
 // }}}2 DollarGestureEvent
 
 // {{{2 DropEvent
-// TODO make this implement Event
+
+// DropEvent holds a EVENT
 type DropEvent struct {
-	ev C.SDL_DropEvent
+	ev *C.SDL_DropEvent
 }
+
+// Type returns...
+func (e DropEvent) Type() EventType {
+	return EventType(e.ev._type)
+}
+
+func (e DropEvent) Timestamp() uint32 {
+	return uint32(e.ev.timestamp)
+}
+
+// TODO(light)
 
 // }}}2 DropEvent
 
