@@ -271,11 +271,15 @@ func (e KeyboardEvent) IsRepeat() bool {
 	return e.ev.repeat != 0
 }
 
-// TODO this
-/*
-func (e KeyboardEvent) Keysym() Keysym {
+// KeySym returns the key information from this event.
+func (e KeyboardEvent) KeySym() KeySym {
+	return KeySym{
+		ScanCode: int32(e.ev.keysym.scancode),
+		KeyCode:  int32(e.ev.keysym.sym),
+		Mod:      KeyMod(e.ev.keysym.mod),
+	}
 }
-*/
+
 // }}}2 KeyboardEvent
 
 // {{{2 TextEditingEvent
