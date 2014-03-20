@@ -19,7 +19,11 @@ func main() {
 		sdl.Quit()
 		os.Exit(2)
 	}
-	if err := run(); err != nil {
+	var err error
+	go sdl.Do(func() { err = run() })
+	sdl.Main()
+
+	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
@@ -27,6 +31,7 @@ func main() {
 
 func run() error {
 	defer sdl.Quit()
+	sdl.Init(sdl.InitVideo)
 
 	surfaces, err := loadImages(flag.Args())
 	defer func() {
