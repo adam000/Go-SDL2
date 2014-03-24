@@ -145,6 +145,10 @@ func convertEvent(cEvent unsafe.Pointer) Event {
 		return commonEvent{common}
 	case KeyDownEventType, KeyUpEventType:
 		return KeyboardEvent{(*C.SDL_KeyboardEvent)(cEvent)}
+	case TextEditingEventType:
+		return TextEditingEvent{(*C.SDL_TextEditingEvent)(cEvent)}
+	case TextInputEventType:
+		return TextInputEvent{(*C.SDL_TextInputEvent)(cEvent)}
 	case WindowEventType:
 		return WindowEvent{(*C.SDL_WindowEvent)(cEvent)}
 	case MouseMotionEventType:
@@ -279,17 +283,68 @@ func (e KeyboardEvent) Keysym() Keysym {
 // }}}2 KeyboardEvent
 
 // {{{2 TextEditingEvent
-// TODO make this implement Event
+
+// TextEditingEvent holds a partial text input event.  See the description of TextInputEvent.
 type TextEditingEvent struct {
-	ev C.SDL_TextEditingEvent
+	ev *C.SDL_TextEditingEvent
+}
+
+// Type returns TextEditingEventType.
+func (e TextEditingEvent) Type() EventType {
+	return EventType(e.ev._type)
+}
+
+func (e TextEditingEvent) Timestamp() uint32 {
+	return uint32(e.ev.timestamp)
+}
+
+// WindowID returns the window with keyboard focus
+func (e TextEditingEvent) WindowID() uint32 {
+	return uint32(e.ev.windowID)
+}
+
+// Text returns the partial text.
+func (e TextEditingEvent) Text() string {
+	return C.GoString(&e.ev.text[0])
+}
+
+// Cursor returns the range of characters to edit.
+func (e TextEditingEvent) Cursor() (start, n int) {
+	return int(e.ev.start), int(e.ev.length)
 }
 
 // }}}2 TextEditingEvent
 
 // {{{2 TextInputEvent
-// TODO make this implement Event
+
+// TextInputEvent holds a complete text input event.
+//
+// For every text input, there are one or more text editing events followed by
+// one text input event.  An input method may require multiple key presses to
+// input a single character.  The text editing events allow an application to
+// render feedback of receiving the characters before inputting the final
+// character.
 type TextInputEvent struct {
-	ev C.SDL_TextInputEvent
+	ev *C.SDL_TextInputEvent
+}
+
+// Type returns TextInputEventType.
+func (e TextInputEvent) Type() EventType {
+	return EventType(e.ev._type)
+}
+
+func (e TextInputEvent) Timestamp() uint32 {
+	return uint32(e.ev.timestamp)
+}
+
+// WindowID returns the window with keyboard focus
+func (e TextInputEvent) WindowID() uint32 {
+	return uint32(e.ev.windowID)
+}
+
+// Text returns the inputted text.
+func (e TextInputEvent) Text() string {
+	return C.GoString(&e.ev.text[0])
 }
 
 // }}}2 TextInputEvent
