@@ -6,6 +6,8 @@ import "C"
 import (
 	"fmt"
 	"unsafe"
+
+	"github.com/adam000/Go-SDL2/sdl/keys"
 )
 
 //
@@ -280,7 +282,7 @@ func (e KeyboardEvent) KeySym() KeySym {
 	return KeySym{
 		ScanCode: int32(e.ev.keysym.scancode),
 		KeyCode:  int32(e.ev.keysym.sym),
-		Mod:      KeyMod(e.ev.keysym.mod),
+		Mod:      keys.Mod(e.ev.keysym.mod),
 	}
 }
 
