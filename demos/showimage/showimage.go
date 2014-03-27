@@ -8,6 +8,7 @@ import (
 
 	"github.com/adam000/Go-SDL2/image"
 	"github.com/adam000/Go-SDL2/sdl"
+	"github.com/adam000/Go-SDL2/sdl/keys"
 )
 
 var fullscreen = flag.Bool("fullscreen", false, "fullscreen window")
@@ -61,18 +62,30 @@ func mainLoop(renderer sdl.Renderer, textures []sdl.Texture) {
 	currTex := 0
 	for {
 		// Poll for events
-		for {
-			ev := sdl.PollEvent()
-			if ev == nil {
-				break
-			}
-			switch ev.Type() {
+		for sdl.HasEvent() {
+			switch ev := sdl.PollEvent(); ev.Type() {
 			case sdl.QuitEventType:
 				fmt.Println("QUIT")
 				return
 			case sdl.KeyDownEventType:
-				fmt.Println("KEY")
-				// TODO(light): advance texture
+				ev := ev.(*sdl.KeyboardEvent)
+				fmt.Println("KEY", ev.Code)
+				switch ev.Code {
+				case keys.Escape:
+					return
+				case keys.Left:
+					if currTex > 0 {
+						currTex--
+					} else {
+						currTex = len(textures) - 1
+					}
+				case keys.Right:
+					if currTex < len(textures)-1 {
+						currTex++
+					} else {
+						currTex = 0
+					}
+				}
 			}
 		}
 
