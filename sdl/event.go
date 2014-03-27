@@ -258,12 +258,45 @@ func convertEvent(cEvent unsafe.Pointer) Event {
 			Which: int32(ce.which),
 			Added: EventType(ce._type) == JoyDeviceAddedEventType,
 		}
-	default:
-		fmt.Println("Unhandled event type:", EventType(common._type))
-		return &commonEvent{
-			tp:   EventType(common._type),
-			time: uint32(common.timestamp),
+	case ControllerAxisMotionEventType:
+		ce := (*C.SDL_ControllerAxisEvent)(cEvent)
+		return &ControllerAxisEvent{
+			Time:  uint32(ce.timestamp),
+			Which: JoystickID(ce.which),
+			Axis:  uint8(ce.axis),
+			Value: int16(ce.value),
 		}
+	case ControllerButtonDownEventType, ControllerButtonUpEventType:
+		ce := (*C.SDL_ControllerButtonEvent)(cEvent)
+		return &ControllerButtonEvent{
+			Time:    uint32(ce.timestamp),
+			Which:   JoystickID(ce.which),
+			Button:  uint8(ce.button),
+			Pressed: ce.state == C.SDL_PRESSED,
+		}
+	case ControllerDeviceAddedEventType, ControllerDeviceRemovedEventType, ControllerDeviceRemappedEventType:
+		ce := (*C.SDL_ControllerDeviceEvent)(cEvent)
+		return &ControllerDeviceEvent{
+			EventType: EventType(ce._type),
+			Time:      uint32(ce.timestamp),
+			Which:     int32(ce.which),
+		}
+	}
+	if EventType(common._type).IsUserEvent() {
+		ce := (*C.SDL_UserEvent)(cEvent)
+		return &UserEvent{
+			EventType: EventType(ce._type),
+			Time:      uint32(ce.timestamp),
+			WindowID:  uint32(ce.windowID),
+			Code:      int32(ce.code),
+			Data1:     ce.data1,
+			Data2:     ce.data2,
+		}
+	}
+	fmt.Println("Unhandled event type:", EventType(common._type))
+	return &commonEvent{
+		tp:   EventType(common._type),
+		time: uint32(common.timestamp),
 	}
 }
 
@@ -639,103 +672,96 @@ func (e *JoyDeviceEvent) Timestamp() uint32 {
 
 // {{{2 ControllerAxisEvent
 
-// ControllerAxisEvent holds a EVENT
+// ControllerAxisEvent holds a controller axis movement event.
 type ControllerAxisEvent struct {
-	ev *C.SDL_ControllerAxisEvent
+	Time  uint32
+	Which JoystickID
+	Axis  uint8 // TODO(light): GameControllerAxis
+	Value int16
 }
 
-// Type returns...
-func (e ControllerAxisEvent) Type() EventType {
-	return EventType(e.ev._type)
+// Type returns ControllerAxisMotionEventType.
+func (e *ControllerAxisEvent) Type() EventType {
+	return ControllerAxisMotionEventType
 }
 
-func (e ControllerAxisEvent) Timestamp() uint32 {
-	return uint32(e.ev.timestamp)
+func (e *ControllerAxisEvent) Timestamp() uint32 {
+	return e.Time
 }
-
-// TODO(light)
 
 // }}}2 ControllerAxisEvent
 
 // {{{2 ControllerButtonEvent
 
-// ControllerButtonEvent holds a EVENT
+// ControllerButtonEvent holds a game controller button event.
 type ControllerButtonEvent struct {
-	ev *C.SDL_ControllerButtonEvent
+	Time    uint32
+	Which   JoystickID
+	Button  uint8 // TODO(light): GameControllerButton
+	Pressed bool
 }
 
-// Type returns...
-func (e ControllerButtonEvent) Type() EventType {
-	return EventType(e.ev._type)
+// Type returns ControllerButtonDownEventType or ControllerButtonUpEventType.
+func (e *ControllerButtonEvent) Type() EventType {
+	if e.Pressed {
+		return ControllerButtonDownEventType
+	} else {
+		return ControllerButtonUpEventType
+	}
 }
 
-func (e ControllerButtonEvent) Timestamp() uint32 {
-	return uint32(e.ev.timestamp)
+func (e *ControllerButtonEvent) Timestamp() uint32 {
+	return e.Time
 }
-
-// TODO(light)
 
 // }}}2 ControllerButtonEvent
 
 // {{{2 ControllerDeviceEvent
 
-// ControllerDeviceEvent holds a EVENT
+// ControllerDeviceEvent holds a game controller device change event.
 type ControllerDeviceEvent struct {
-	ev *C.SDL_ControllerDeviceEvent
+	EventType EventType
+	Time      uint32
+	Which     int32 // the device index for add events, otherwise the instance ID
 }
 
-// Type returns...
-func (e ControllerDeviceEvent) Type() EventType {
-	return EventType(e.ev._type)
+// Type returns one of ControllerDeviceAddedEventType, ControllerDeviceRemovedEventType, or ControllerDeviceRemappedEventType.
+func (e *ControllerDeviceEvent) Type() EventType {
+	return e.EventType
 }
 
-func (e ControllerDeviceEvent) Timestamp() uint32 {
-	return uint32(e.ev.timestamp)
+func (e *ControllerDeviceEvent) Timestamp() uint32 {
+	return e.Time
 }
-
-// TODO(light)
 
 // }}}2 ControllerDeviceEvent
 
 // {{{2 UserEvent
 
-// UserEvent holds a EVENT
+// UserEvent holds a user-defined event.
 type UserEvent struct {
-	ev *C.SDL_UserEvent
+	EventType    EventType
+	Time         uint32
+	WindowID     uint32
+	Code         int32
+	Data1, Data2 unsafe.Pointer
 }
 
-// Type returns...
-func (e UserEvent) Type() EventType {
-	return EventType(e.ev._type)
+// Type returns the event's type.
+func (e *UserEvent) Type() EventType {
+	return e.EventType
 }
 
-func (e UserEvent) Timestamp() uint32 {
-	return uint32(e.ev.timestamp)
+func (e *UserEvent) Timestamp() uint32 {
+	return e.Time
 }
 
-// TODO(light)
+// Window returns the associated window ID or zero.
+func (e *UserEvent) Window() uint32 {
+	return e.WindowID
+}
 
 // }}}2 UserEvent
-
-// {{{2 SysWMEvent
-
-// SysWMEvent holds a EVENT
-type SysWMEvent struct {
-	ev *C.SDL_SysWMEvent
-}
-
-// Type returns...
-func (e SysWMEvent) Type() EventType {
-	return EventType(e.ev._type)
-}
-
-func (e SysWMEvent) Timestamp() uint32 {
-	return uint32(e.ev.timestamp)
-}
-
-// TODO(light)
-
-// }}}2 SysWMEvent
 
 // {{{2 TouchFingerEvent
 
