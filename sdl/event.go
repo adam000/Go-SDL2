@@ -252,16 +252,18 @@ const (
 // }}}2 WindowEvent
 
 // {{{2 KeyboardEvent
+
+// KeyboardEvent holds a key press or key release event.
 type KeyboardEvent struct {
 	ev *C.SDL_KeyboardEvent
 }
 
-func (e KeyboardEvent) Timestamp() uint32 {
-	return uint32(e.ev.timestamp)
-}
-
 func (e KeyboardEvent) Type() EventType {
 	return EventType(e.ev._type)
+}
+
+func (e KeyboardEvent) Timestamp() uint32 {
+	return uint32(e.ev.timestamp)
 }
 
 func (e KeyboardEvent) WindowID() uint32 {
@@ -280,10 +282,17 @@ func (e KeyboardEvent) IsRepeat() bool {
 // KeySym returns the key information from this event.
 func (e KeyboardEvent) KeySym() KeySym {
 	return KeySym{
-		ScanCode: int32(e.ev.keysym.scancode),
-		KeyCode:  int32(e.ev.keysym.sym),
+		Scancode: keys.Scancode(e.ev.keysym.scancode),
+		KeyCode:  keys.Code(e.ev.keysym.sym),
 		Mod:      keys.Mod(e.ev.keysym.mod),
 	}
+}
+
+// KeySym holds the keyboard information from a keyboard event.
+type KeySym struct {
+	Scancode keys.Scancode
+	KeyCode  keys.Code
+	Mod      keys.Mod
 }
 
 // }}}2 KeyboardEvent
