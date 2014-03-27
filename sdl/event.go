@@ -144,34 +144,126 @@ func convertEvent(cEvent unsafe.Pointer) Event {
 	switch EventType(common._type) {
 	case QuitEventType:
 		// Quit events don't hold any data beyond the common events.
-		return commonEvent{common}
-	case KeyDownEventType, KeyUpEventType:
-		return KeyboardEvent{(*C.SDL_KeyboardEvent)(cEvent)}
-	case TextEditingEventType:
-		return TextEditingEvent{(*C.SDL_TextEditingEvent)(cEvent)}
-	case TextInputEventType:
-		return TextInputEvent{(*C.SDL_TextInputEvent)(cEvent)}
+		return &commonEvent{
+			tp:   EventType(common._type),
+			time: uint32(common.timestamp),
+		}
 	case WindowEventType:
-		return WindowEvent{(*C.SDL_WindowEvent)(cEvent)}
+		ce := (*C.SDL_WindowEvent)(cEvent)
+		return &WindowEvent{
+			Time:     uint32(ce.timestamp),
+			WindowID: uint32(ce.windowID),
+			Event:    WindowEventID(ce.event),
+			Data1:    int32(ce.data1),
+			Data2:    int32(ce.data2),
+		}
+	case KeyDownEventType, KeyUpEventType:
+		ce := (*C.SDL_KeyboardEvent)(cEvent)
+		return &KeyboardEvent{
+			Time:     uint32(ce.timestamp),
+			WindowID: uint32(ce.windowID),
+			Pressed:  ce.state == C.SDL_PRESSED,
+			Repeat:   ce.repeat != 0,
+			KeySym: KeySym{
+				Scancode: keys.Scancode(ce.keysym.scancode),
+				Code:     keys.Code(ce.keysym.sym),
+				Mod:      keys.Mod(ce.keysym.mod),
+			},
+		}
+	case TextEditingEventType:
+		ce := (*C.SDL_TextEditingEvent)(cEvent)
+		return &TextEditingEvent{
+			Time:     uint32(ce.timestamp),
+			WindowID: uint32(ce.windowID),
+			Text:     C.GoString(&ce.text[0]),
+			Start:    int(ce.start),
+			Length:   int(ce.length),
+		}
+	case TextInputEventType:
+		ce := (*C.SDL_TextInputEvent)(cEvent)
+		return &TextInputEvent{
+			Time:     uint32(ce.timestamp),
+			WindowID: uint32(ce.windowID),
+			Text:     C.GoString(&ce.text[0]),
+		}
 	case MouseMotionEventType:
-		return MouseMotionEvent{(*C.SDL_MouseMotionEvent)(cEvent)}
+		ce := (*C.SDL_MouseMotionEvent)(cEvent)
+		return &MouseMotionEvent{
+			Time:     uint32(ce.timestamp),
+			WindowID: uint32(ce.windowID),
+			Which:    uint32(ce.which),
+			State:    uint32(ce.state),
+			X:        int32(ce.x),
+			Y:        int32(ce.y),
+			RelX:     int32(ce.xrel),
+			RelY:     int32(ce.yrel),
+		}
 	case MouseButtonDownEventType, MouseButtonUpEventType:
-		return MouseButtonEvent{(*C.SDL_MouseButtonEvent)(cEvent)}
+		ce := (*C.SDL_MouseButtonEvent)(cEvent)
+		return &MouseButtonEvent{
+			Time:     uint32(ce.timestamp),
+			WindowID: uint32(ce.windowID),
+			Which:    uint32(ce.which),
+			Button:   MouseButton(ce.button),
+			Pressed:  ce.state == C.SDL_PRESSED,
+			X:        int32(ce.x),
+			Y:        int32(ce.y),
+		}
 	case MouseWheelEventType:
-		return MouseWheelEvent{(*C.SDL_MouseWheelEvent)(cEvent)}
+		ce := (*C.SDL_MouseWheelEvent)(cEvent)
+		return &MouseWheelEvent{
+			Time:     uint32(ce.timestamp),
+			WindowID: uint32(ce.windowID),
+			Which:    uint32(ce.which),
+			X:        int32(ce.x),
+			Y:        int32(ce.y),
+		}
 	case JoyAxisMotionEventType:
-		return JoyAxisEvent{(*C.SDL_JoyAxisEvent)(cEvent)}
+		ce := (*C.SDL_JoyAxisEvent)(cEvent)
+		return &JoyAxisEvent{
+			Time:  uint32(ce.timestamp),
+			Which: JoystickID(ce.which),
+			Axis:  uint8(ce.axis),
+			Value: int16(ce.value),
+		}
 	case JoyBallMotionEventType:
-		return JoyBallEvent{(*C.SDL_JoyBallEvent)(cEvent)}
+		ce := (*C.SDL_JoyBallEvent)(cEvent)
+		return &JoyBallEvent{
+			Time:  uint32(ce.timestamp),
+			Which: JoystickID(ce.which),
+			Ball:  uint8(ce.ball),
+			RelX:  int16(ce.xrel),
+			RelY:  int16(ce.yrel),
+		}
 	case JoyHatMotionEventType:
-		return JoyHatEvent{(*C.SDL_JoyHatEvent)(cEvent)}
+		ce := (*C.SDL_JoyHatEvent)(cEvent)
+		return &JoyHatEvent{
+			Time:     uint32(ce.timestamp),
+			Which:    JoystickID(ce.which),
+			Hat:      uint8(ce.hat),
+			Position: HatPosition(ce.value),
+		}
 	case JoyButtonDownEventType, JoyButtonUpEventType:
-		return JoyButtonEvent{(*C.SDL_JoyButtonEvent)(cEvent)}
+		ce := (*C.SDL_JoyButtonEvent)(cEvent)
+		return &JoyButtonEvent{
+			Time:    uint32(ce.timestamp),
+			Which:   JoystickID(ce.which),
+			Button:  uint8(ce.button),
+			Pressed: ce.state == C.SDL_PRESSED,
+		}
 	case JoyDeviceAddedEventType, JoyDeviceRemovedEventType:
-		return JoyDeviceEvent{(*C.SDL_JoyDeviceEvent)(cEvent)}
+		ce := (*C.SDL_JoyDeviceEvent)(cEvent)
+		return &JoyDeviceEvent{
+			Time:  uint32(ce.timestamp),
+			Which: int32(ce.which),
+			Added: EventType(ce._type) == JoyDeviceAddedEventType,
+		}
 	default:
-		fmt.Println("Unhandled event with int:", int(common._type))
-		return commonEvent{common}
+		fmt.Println("Unhandled event type:", EventType(common._type))
+		return &commonEvent{
+			tp:   EventType(common._type),
+			time: uint32(common.timestamp),
+		}
 	}
 }
 
@@ -182,15 +274,16 @@ func convertEvent(cEvent unsafe.Pointer) Event {
 // commonEvent holds fields common to all events.  It is not exported because it
 // doesn't provide anything useful outside of the Event interface.
 type commonEvent struct {
-	ev *C.SDL_CommonEvent
+	tp   EventType
+	time uint32
 }
 
-func (e commonEvent) Type() EventType {
-	return EventType(e.ev._type)
+func (e *commonEvent) Type() EventType {
+	return e.tp
 }
 
-func (e commonEvent) Timestamp() uint32 {
-	return uint32(e.ev.timestamp)
+func (e *commonEvent) Timestamp() uint32 {
+	return e.time
 }
 
 // }}}2 CommonEvent
@@ -199,33 +292,27 @@ func (e commonEvent) Timestamp() uint32 {
 
 // WindowEvent holds window state change event data.
 type WindowEvent struct {
-	ev *C.SDL_WindowEvent
+	Time     uint32
+	WindowID uint32
+	Event    WindowEventID
+
+	// For move events, this is the new (x, y) position of the window.
+	// For resize events, this is the new window size.
+	Data1, Data2 int32
 }
 
-// Type returns WindowEventType.
-func (e WindowEvent) Type() EventType {
+// EventType returns WindowEventType.
+func (e *WindowEvent) Type() EventType {
 	return WindowEventType
 }
 
-func (e WindowEvent) Timestamp() uint32 {
-	return uint32(e.ev.timestamp)
+func (e *WindowEvent) Timestamp() uint32 {
+	return e.Time
 }
 
-// WindowID returns the ID of the window that this event occurred in.
-func (e WindowEvent) WindowID() uint32 {
-	return uint32(e.ev.windowID)
-}
-
-// WindowEvent returns the specific state change that occurred on the window.
-func (e WindowEvent) WindowEvent() WindowEventID {
-	return WindowEventID(e.ev.event)
-}
-
-// Data returns the event-dependent data.
-// For move events, this is the new (x, y) position of the window.
-// For resize events, this is the new window size.
-func (e WindowEvent) Data() (data1, data2 int32) {
-	return int32(e.ev.data1), int32(e.ev.data2)
+// Window returns the ID of the window that this event occurred in.
+func (e *WindowEvent) Window() uint32 {
+	return e.WindowID
 }
 
 // WindowEventID is a window event subtype.
@@ -255,43 +342,33 @@ const (
 
 // KeyboardEvent holds a key press or key release event.
 type KeyboardEvent struct {
-	ev *C.SDL_KeyboardEvent
+	Time     uint32
+	WindowID uint32
+	Pressed  bool
+	Repeat   bool
+	KeySym
 }
 
-func (e KeyboardEvent) Type() EventType {
-	return EventType(e.ev._type)
-}
-
-func (e KeyboardEvent) Timestamp() uint32 {
-	return uint32(e.ev.timestamp)
-}
-
-func (e KeyboardEvent) WindowID() uint32 {
-	return uint32(e.ev.windowID)
-}
-
-func (e KeyboardEvent) State() uint8 {
-	return uint8(e.ev.state)
-}
-
-// IsRepeat reports whether this event is a repeating key.
-func (e KeyboardEvent) IsRepeat() bool {
-	return e.ev.repeat != 0
-}
-
-// KeySym returns the key information from this event.
-func (e KeyboardEvent) KeySym() KeySym {
-	return KeySym{
-		Scancode: keys.Scancode(e.ev.keysym.scancode),
-		KeyCode:  keys.Code(e.ev.keysym.sym),
-		Mod:      keys.Mod(e.ev.keysym.mod),
+func (e *KeyboardEvent) Type() EventType {
+	if e.Pressed {
+		return KeyDownEventType
+	} else {
+		return KeyUpEventType
 	}
+}
+
+func (e *KeyboardEvent) Timestamp() uint32 {
+	return e.Time
+}
+
+func (e *KeyboardEvent) Window() uint32 {
+	return e.WindowID
 }
 
 // KeySym holds the keyboard information from a keyboard event.
 type KeySym struct {
 	Scancode keys.Scancode
-	KeyCode  keys.Code
+	Code     keys.Code
 	Mod      keys.Mod
 }
 
@@ -301,31 +378,25 @@ type KeySym struct {
 
 // TextEditingEvent holds a partial text input event.  See the description of TextInputEvent.
 type TextEditingEvent struct {
-	ev *C.SDL_TextEditingEvent
+	Time     uint32
+	WindowID uint32
+	Text     string
+	Start    int // location to begin editing from
+	Length   int // number of characters to edit
 }
 
 // Type returns TextEditingEventType.
-func (e TextEditingEvent) Type() EventType {
-	return EventType(e.ev._type)
+func (e *TextEditingEvent) Type() EventType {
+	return TextEditingEventType
 }
 
-func (e TextEditingEvent) Timestamp() uint32 {
-	return uint32(e.ev.timestamp)
+func (e *TextEditingEvent) Timestamp() uint32 {
+	return e.Time
 }
 
-// WindowID returns the window with keyboard focus
-func (e TextEditingEvent) WindowID() uint32 {
-	return uint32(e.ev.windowID)
-}
-
-// Text returns the partial text.
-func (e TextEditingEvent) Text() string {
-	return C.GoString(&e.ev.text[0])
-}
-
-// Cursor returns the range of characters to edit.
-func (e TextEditingEvent) Cursor() (start, n int) {
-	return int(e.ev.start), int(e.ev.length)
+// Window returns the window with keyboard focus or zero.
+func (e *TextEditingEvent) Window() uint32 {
+	return e.WindowID
 }
 
 // }}}2 TextEditingEvent
@@ -340,26 +411,23 @@ func (e TextEditingEvent) Cursor() (start, n int) {
 // render feedback of receiving the characters before inputting the final
 // character.
 type TextInputEvent struct {
-	ev *C.SDL_TextInputEvent
+	Time     uint32
+	WindowID uint32
+	Text     string
 }
 
 // Type returns TextInputEventType.
-func (e TextInputEvent) Type() EventType {
-	return EventType(e.ev._type)
+func (e *TextInputEvent) Type() EventType {
+	return TextInputEventType
 }
 
-func (e TextInputEvent) Timestamp() uint32 {
-	return uint32(e.ev.timestamp)
+func (e *TextInputEvent) Timestamp() uint32 {
+	return e.Time
 }
 
-// WindowID returns the window with keyboard focus
-func (e TextInputEvent) WindowID() uint32 {
-	return uint32(e.ev.windowID)
-}
-
-// Text returns the inputted text.
-func (e TextInputEvent) Text() string {
-	return C.GoString(&e.ev.text[0])
+// Window returns the window with keyboard focus or zero.
+func (e *TextInputEvent) Window() uint32 {
+	return e.WindowID
 }
 
 // }}}2 TextInputEvent
@@ -368,41 +436,26 @@ func (e TextInputEvent) Text() string {
 
 // MouseMotionEvent holds a mouse movement event.
 type MouseMotionEvent struct {
-	ev *C.SDL_MouseMotionEvent
+	Time       uint32
+	WindowID   uint32
+	Which      uint32 // mouse that triggered the event
+	State      uint32
+	X, Y       int32
+	RelX, RelY int32
 }
 
-// Type returns MouseMotionEventType
-func (e MouseMotionEvent) Type() EventType {
-	return EventType(e.ev._type)
+// Type returns MouseMotionEventType.
+func (e *MouseMotionEvent) Type() EventType {
+	return MouseMotionEventType
 }
 
-func (e MouseMotionEvent) Timestamp() uint32 {
-	return uint32(e.ev.timestamp)
+func (e *MouseMotionEvent) Timestamp() uint32 {
+	return e.Time
 }
 
 // WindowID returns the window with mouse focus, or zero if no window has focus.
-func (e MouseMotionEvent) WindowID() uint32 {
-	return uint32(e.ev.windowID)
-}
-
-// Which returns the mouse which triggered the event.
-func (e MouseMotionEvent) Which() uint32 {
-	return uint32(e.ev.which)
-}
-
-// ButtonState returns a bitmask of the current button state.  Use MouseButton.Mask
-func (e MouseMotionEvent) ButtonState() uint32 {
-	return uint32(e.ev.state)
-}
-
-// Position returns the new (x, y) coordinate of the event, relative to the window.
-func (e MouseMotionEvent) Position() (x, y int32) {
-	return int32(e.ev.x), int32(e.ev.y)
-}
-
-// Delta returns the relative (x, y) motion captured by this event.
-func (e MouseMotionEvent) Delta() (dx, dy int32) {
-	return int32(e.ev.xrel), int32(e.ev.yrel)
+func (e *MouseMotionEvent) Window() uint32 {
+	return e.WindowID
 }
 
 // }}}2 MouseMotionEvent
@@ -411,53 +464,37 @@ func (e MouseMotionEvent) Delta() (dx, dy int32) {
 
 // MouseButtonEvent holds a mouse button press or release event.
 type MouseButtonEvent struct {
-	ev *C.SDL_MouseButtonEvent
+	Time     uint32
+	WindowID uint32
+	Which    uint32
+	Button   MouseButton
+	Pressed  bool
+	// TODO(light): this is only available in SDL 2.0.2 and above
+	// Clicks uint8 // number of clicks in sequence: 1 for single-click, 2 for double-click, etc.
+	X, Y int32
 }
 
 // Type returns either MouseButtonDownEventType or MouseButtonUpEventType.
-func (e MouseButtonEvent) Type() EventType {
-	return EventType(e.ev._type)
+func (e *MouseButtonEvent) Type() EventType {
+	if e.Pressed {
+		return MouseButtonDownEventType
+	} else {
+		return MouseButtonUpEventType
+	}
 }
 
-func (e MouseButtonEvent) Timestamp() uint32 {
-	return uint32(e.ev.timestamp)
+func (e *MouseButtonEvent) Timestamp() uint32 {
+	return e.Time
 }
 
-// WindowID returns the window with mouse focus, or zero if no window has focus.
-func (e MouseButtonEvent) WindowID() uint32 {
-	return uint32(e.ev.windowID)
-}
-
-// Which returns the mouse which triggered the event.
-func (e MouseButtonEvent) Which() uint32 {
-	return uint32(e.ev.which)
+// Window returns the window with mouse focus, or zero if no window has focus.
+func (e *MouseButtonEvent) Window() uint32 {
+	return e.WindowID
 }
 
 // IsTouch reports whether this event was generated by a touch input device.
-func (e MouseButtonEvent) IsTouch() bool {
-	return e.ev.which == C.SDL_TOUCH_MOUSEID
-}
-
-// Button returns the button that changed.
-func (e MouseButtonEvent) Button() MouseButton {
-	return MouseButton(e.ev.button)
-}
-
-// IsPressed reports whether the button is pressed.
-func (e MouseButtonEvent) IsPressed() bool {
-	return e.ev.state == C.SDL_PRESSED
-}
-
-// TODO(light): this is only available in SDL 2.0.2 and above
-// Clicks returns the number of clicks in sequence: 1 for single-click,
-// 2 for double-click, etc.
-//func (e MouseButtonEvent) Clicks() int {
-//	return int(e.ev.clicks)
-//}
-
-// Position returns the (x, y) coordinate of the event, relative to the window.
-func (e MouseButtonEvent) Position() (x, y int32) {
-	return int32(e.ev.x), int32(e.ev.y)
+func (e *MouseButtonEvent) IsTouch() bool {
+	return e.Which == C.SDL_TOUCH_MOUSEID
 }
 
 // }}}2 MouseButtonEvent
@@ -466,31 +503,24 @@ func (e MouseButtonEvent) Position() (x, y int32) {
 
 // MouseWheelEvent holds a mouse wheel movement event.
 type MouseWheelEvent struct {
-	ev *C.SDL_MouseWheelEvent
+	Time     uint32
+	WindowID uint32
+	Which    uint32
+	X, Y     int32 // Scroll delta. The axes increase right and up.
 }
 
 // Type returns MouseWheelEventType.
-func (e MouseWheelEvent) Type() EventType {
-	return EventType(e.ev._type)
+func (e *MouseWheelEvent) Type() EventType {
+	return MouseWheelEventType
 }
 
-func (e MouseWheelEvent) Timestamp() uint32 {
-	return uint32(e.ev.timestamp)
+func (e *MouseWheelEvent) Timestamp() uint32 {
+	return e.Time
 }
 
-// WindowID returns the window with mouse focus, or zero if no window has focus.
-func (e MouseWheelEvent) WindowID() uint32 {
-	return uint32(e.ev.windowID)
-}
-
-// Which returns the mouse which triggered the event.
-func (e MouseWheelEvent) Which() uint32 {
-	return uint32(e.ev.which)
-}
-
-// Scroll returns the amount scrolled in X and Y.  The axes increase right and up.
-func (e MouseWheelEvent) Scroll() (x, y int32) {
-	return int32(e.ev.x), int32(e.ev.y)
+// Window returns the window with mouse focus, or zero if no window has focus.
+func (e *MouseWheelEvent) Window() uint32 {
+	return e.WindowID
 }
 
 // }}}2 MouseWheelEvent
@@ -499,31 +529,19 @@ func (e MouseWheelEvent) Scroll() (x, y int32) {
 
 // JoyAxisEvent holds a joystick axis movement event.
 type JoyAxisEvent struct {
-	ev *C.SDL_JoyAxisEvent
+	Time  uint32
+	Which JoystickID
+	Axis  uint8
+	Value int16
 }
 
 // Type returns JoyAxisMotionEventType.
-func (e JoyAxisEvent) Type() EventType {
-	return EventType(e.ev._type)
+func (e *JoyAxisEvent) Type() EventType {
+	return JoyAxisMotionEventType
 }
 
-func (e JoyAxisEvent) Timestamp() uint32 {
-	return uint32(e.ev.timestamp)
-}
-
-// Which returns the joystick which triggered the event.
-func (e JoyAxisEvent) Which() JoystickID {
-	return JoystickID(e.ev.which)
-}
-
-// Axis returns the index of the axis that changed.
-func (e JoyAxisEvent) Axis() uint8 {
-	return uint8(e.ev.axis)
-}
-
-// Value returns the current position of the axis.
-func (e JoyAxisEvent) Value() int16 {
-	return int16(e.ev.value)
+func (e *JoyAxisEvent) Timestamp() uint32 {
+	return e.Time
 }
 
 // }}}2 JoyAxisEvent
@@ -532,64 +550,40 @@ func (e JoyAxisEvent) Value() int16 {
 
 // JoyBallEvent holds a joystick trackball motion event.
 type JoyBallEvent struct {
-	ev *C.SDL_JoyBallEvent
+	Time       uint32
+	Which      JoystickID
+	Ball       uint8
+	RelX, RelY int16
 }
 
 // Type returns JoyBallMotionEventType.
-func (e JoyBallEvent) Type() EventType {
-	return EventType(e.ev._type)
+func (e *JoyBallEvent) Type() EventType {
+	return JoyBallMotionEventType
 }
 
-func (e JoyBallEvent) Timestamp() uint32 {
-	return uint32(e.ev.timestamp)
-}
-
-// Which returns the joystick which triggered the event.
-func (e JoyBallEvent) Which() JoystickID {
-	return JoystickID(e.ev.which)
-}
-
-// Ball returns the index of the trackball that changed.
-func (e JoyBallEvent) Ball() uint8 {
-	return uint8(e.ev.ball)
-}
-
-// Delta returns the relative (x, y) motion captured by this event.
-func (e JoyBallEvent) Delta() (dx, dy int16) {
-	return int16(e.ev.xrel), int16(e.ev.yrel)
+func (e *JoyBallEvent) Timestamp() uint32 {
+	return e.Time
 }
 
 // }}}2 JoyBallEvent
 
 // {{{2 JoyHatEvent
 
-// JoyHatEvent holds a EVENT
+// JoyHatEvent holds a joystick hat movement event.
 type JoyHatEvent struct {
-	ev *C.SDL_JoyHatEvent
+	Time     uint32
+	Which    JoystickID
+	Hat      uint8
+	Position HatPosition
 }
 
 // Type returns JoyHatMotionEventType.
-func (e JoyHatEvent) Type() EventType {
-	return EventType(e.ev._type)
+func (e *JoyHatEvent) Type() EventType {
+	return JoyHatMotionEventType
 }
 
-func (e JoyHatEvent) Timestamp() uint32 {
-	return uint32(e.ev.timestamp)
-}
-
-// Which returns the joystick which triggered the event.
-func (e JoyHatEvent) Which() JoystickID {
-	return JoystickID(e.ev.which)
-}
-
-// Hat returns the index of the hat that changed.
-func (e JoyHatEvent) Hat() uint8 {
-	return uint8(e.ev.hat)
-}
-
-// Position returns the new position of the hat.
-func (e JoyHatEvent) Position() HatPosition {
-	return HatPosition(e.ev.value)
+func (e *JoyHatEvent) Timestamp() uint32 {
+	return e.Time
 }
 
 // }}}2 JoyHatEvent
@@ -598,31 +592,23 @@ func (e JoyHatEvent) Position() HatPosition {
 
 // JoyButtonEvent holds a EVENT
 type JoyButtonEvent struct {
-	ev *C.SDL_JoyButtonEvent
+	Time    uint32
+	Which   JoystickID
+	Button  uint8
+	Pressed bool
 }
 
 // Type returns either JoyButtonDownEventType or JoyButtonUpEventType.
-func (e JoyButtonEvent) Type() EventType {
-	return EventType(e.ev._type)
+func (e *JoyButtonEvent) Type() EventType {
+	if e.Pressed {
+		return JoyButtonDownEventType
+	} else {
+		return JoyButtonUpEventType
+	}
 }
 
-func (e JoyButtonEvent) Timestamp() uint32 {
-	return uint32(e.ev.timestamp)
-}
-
-// Which returns the joystick which triggered the event.
-func (e JoyButtonEvent) Which() JoystickID {
-	return JoystickID(e.ev.which)
-}
-
-// Button returns the index of the button that changed.
-func (e JoyButtonEvent) Button() uint8 {
-	return uint8(e.ev.button)
-}
-
-// IsPressed reports whether the button is pressed.
-func (e JoyButtonEvent) IsPressed() bool {
-	return e.ev.state == C.SDL_PRESSED
+func (e *JoyButtonEvent) Timestamp() uint32 {
+	return e.Time
 }
 
 // }}}2 JoyButtonEvent
@@ -631,21 +617,22 @@ func (e JoyButtonEvent) IsPressed() bool {
 
 // JoyDeviceEvent holds a joystick connection or disconnection event.
 type JoyDeviceEvent struct {
-	ev *C.SDL_JoyDeviceEvent
+	Time  uint32
+	Which int32 // joystick device index for an added event or instance ID for a removal event.
+	Added bool
 }
 
 // Type returns either JoyDeviceAddedEventType or JoyDeviceRemovedEventType.
-func (e JoyDeviceEvent) Type() EventType {
-	return EventType(e.ev._type)
+func (e *JoyDeviceEvent) Type() EventType {
+	if e.Added {
+		return JoyDeviceAddedEventType
+	} else {
+		return JoyDeviceRemovedEventType
+	}
 }
 
-func (e JoyDeviceEvent) Timestamp() uint32 {
-	return uint32(e.ev.timestamp)
-}
-
-// Which returns the joystick device index for an added event or the instance ID for a removal event.
-func (e JoyDeviceEvent) Which() int32 {
-	return int32(e.ev.which)
+func (e *JoyDeviceEvent) Timestamp() uint32 {
+	return e.Time
 }
 
 // }}}2 JoyDeviceEvent
