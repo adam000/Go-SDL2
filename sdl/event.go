@@ -142,8 +142,8 @@ func HasEvent() bool {
 func convertEvent(cEvent unsafe.Pointer) Event {
 	common := (*C.SDL_CommonEvent)(cEvent)
 	switch EventType(common._type) {
-	case QuitEventType:
-		// Quit events don't hold any data beyond the common events.
+	case QuitEventType, ClipboardUpdateEventType:
+		// Quit and clipboard events don't hold any data beyond the common events.
 		return &commonEvent{
 			tp:   EventType(common._type),
 			time: uint32(common.timestamp),
@@ -281,6 +281,52 @@ func convertEvent(cEvent unsafe.Pointer) Event {
 			Time:      uint32(ce.timestamp),
 			Which:     int32(ce.which),
 		}
+	case FingerMotionEventType, FingerDownEventType, FingerUpEventType:
+		ce := (*C.SDL_TouchFingerEvent)(cEvent)
+		return &TouchFingerEvent{
+			EventType: EventType(ce._type),
+			Time:      uint32(ce.timestamp),
+			TouchID:   int64(ce.touchId),
+			FingerID:  int64(ce.fingerId),
+			X:         float32(ce.x),
+			Y:         float32(ce.y),
+			RelX:      float32(ce.dx),
+			RelY:      float32(ce.dy),
+			Pressure:  float32(ce.pressure),
+		}
+	case MultiGestureEventType:
+		ce := (*C.SDL_MultiGestureEvent)(cEvent)
+		return &MultiGestureEvent{
+			Time:       uint32(ce.timestamp),
+			TouchID:    int64(ce.touchId),
+			DTheta:     float32(ce.dTheta),
+			DDist:      float32(ce.dDist),
+			X:          float32(ce.x),
+			Y:          float32(ce.y),
+			NumFingers: int(ce.numFingers),
+		}
+	case DollarGestureEventType, DollarRecordEventType:
+		ce := (*C.SDL_DollarGestureEvent)(cEvent)
+		return &DollarGestureEvent{
+			Record:     EventType(ce._type) == DollarRecordEventType,
+			Time:       uint32(ce.timestamp),
+			TouchID:    int64(ce.touchId),
+			GestureID:  int64(ce.gestureId),
+			NumFingers: int(ce.numFingers),
+			Error:      float32(ce.error),
+			X:          float32(ce.x),
+			Y:          float32(ce.y),
+		}
+	case DropFileEventType:
+		ce := (*C.SDL_DropEvent)(cEvent)
+		ev := &DropEvent{
+			Time: uint32(ce.timestamp),
+			Path: C.GoString(ce.file),
+		}
+		// since we know the original event will be discarded,
+		// it is safe to free this memory.
+		C.SDL_free(unsafe.Pointer(ce.file))
+		return ev
 	}
 	if EventType(common._type).IsUserEvent() {
 		ce := (*C.SDL_UserEvent)(cEvent)
@@ -765,81 +811,95 @@ func (e *UserEvent) Window() uint32 {
 
 // {{{2 TouchFingerEvent
 
-// TouchFingerEvent holds a EVENT
+// TouchFingerEvent holds a finger touch event.
 type TouchFingerEvent struct {
-	ev *C.SDL_TouchFingerEvent
+	EventType  EventType
+	Time       uint32
+	TouchID    int64 // TODO(light): SDL_TouchID
+	FingerID   int64 // TODO(light): SDL_FingerID
+	X, Y       float32
+	RelX, RelY float32
+	Pressure   float32
 }
 
-// Type returns...
-func (e TouchFingerEvent) Type() EventType {
-	return EventType(e.ev._type)
+// Type returns one of FingerMotionEventType, FingerDownEventType, or FingerUpEventType.
+func (e *TouchFingerEvent) Type() EventType {
+	return e.EventType
 }
 
-func (e TouchFingerEvent) Timestamp() uint32 {
-	return uint32(e.ev.timestamp)
+func (e *TouchFingerEvent) Timestamp() uint32 {
+	return e.Time
 }
-
-// TODO(light)
 
 // }}}2 TouchFingerEvent
 
 // {{{2 MultiGestureEvent
 
-// MultiGestureEvent holds a EVENT
+// MultiGestureEvent holds a multi-finger touch event.
 type MultiGestureEvent struct {
-	ev *C.SDL_MultiGestureEvent
+	Time       uint32
+	TouchID    int64 // TODO(light): SDL_TouchID
+	DTheta     float32
+	DDist      float32
+	X, Y       float32 // center
+	NumFingers int
 }
 
-// Type returns...
-func (e MultiGestureEvent) Type() EventType {
-	return EventType(e.ev._type)
+// Type returns MultiGestureEventType.
+func (e *MultiGestureEvent) Type() EventType {
+	return MultiGestureEventType
 }
 
-func (e MultiGestureEvent) Timestamp() uint32 {
-	return uint32(e.ev.timestamp)
+func (e *MultiGestureEvent) Timestamp() uint32 {
+	return e.Time
 }
-
-// TODO(light)
 
 // }}}2 MultiGestureEvent
 
 // {{{2 DollarGestureEvent
 
-// DollarGestureEvent holds a EVENT
+// DollarGestureEvent holds a gesture recognition event.
 type DollarGestureEvent struct {
-	ev *C.SDL_DollarGestureEvent
+	Time       uint32
+	TouchID    int64 // TODO(light): SDL_TouchID
+	GestureID  int64 // TODO(light): SDL_GestureID
+	NumFingers int
+	Error      float32 // difference between recognized and actual gesture (lower is better)
+	X, Y       float32 // center
+	Record     bool
 }
 
-// Type returns...
-func (e DollarGestureEvent) Type() EventType {
-	return EventType(e.ev._type)
+// Type returns DollarGestureEventType or DollarRecordEventType.
+func (e *DollarGestureEvent) Type() EventType {
+	if e.Record {
+		return DollarRecordEventType
+	} else {
+		return DollarGestureEventType
+	}
 }
 
-func (e DollarGestureEvent) Timestamp() uint32 {
-	return uint32(e.ev.timestamp)
+func (e *DollarGestureEvent) Timestamp() uint32 {
+	return e.Time
 }
-
-// TODO(light)
 
 // }}}2 DollarGestureEvent
 
 // {{{2 DropEvent
 
-// DropEvent holds a EVENT
+// DropEvent holds a file-open (usually by drag-and-drop) event.
 type DropEvent struct {
-	ev *C.SDL_DropEvent
+	Time uint32
+	Path string
 }
 
-// Type returns...
-func (e DropEvent) Type() EventType {
-	return EventType(e.ev._type)
+// Type returns DropFileEventType.
+func (e *DropEvent) Type() EventType {
+	return DropFileEventType
 }
 
-func (e DropEvent) Timestamp() uint32 {
-	return uint32(e.ev.timestamp)
+func (e *DropEvent) Timestamp() uint32 {
+	return e.Time
 }
-
-// TODO(light)
 
 // }}}2 DropEvent
 
