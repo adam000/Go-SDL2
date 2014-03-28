@@ -67,7 +67,7 @@ const (
 )
 
 // modMaskNames is an ordered map of modifier mask to name for Mod.String.
-var modMaskNames = [...]struct{
+var modMaskNames = [...]struct {
 	mask Mod
 	name string
 }{

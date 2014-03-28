@@ -12,12 +12,12 @@ type HatPosition uint8
 
 // Hat positions.
 const (
-	HatCentered  HatPosition = C.SDL_HAT_CENTERED
+	HatCentered HatPosition = C.SDL_HAT_CENTERED
 
-	HatUp        HatPosition = C.SDL_HAT_UP
-	HatRight     HatPosition = C.SDL_HAT_RIGHT
-	HatDown      HatPosition = C.SDL_HAT_DOWN
-	HatLeft      HatPosition = C.SDL_HAT_LEFT
+	HatUp    HatPosition = C.SDL_HAT_UP
+	HatRight HatPosition = C.SDL_HAT_RIGHT
+	HatDown  HatPosition = C.SDL_HAT_DOWN
+	HatLeft  HatPosition = C.SDL_HAT_LEFT
 
 	// OR'd combinations of the above.
 	HatRightUp   HatPosition = C.SDL_HAT_RIGHTUP
