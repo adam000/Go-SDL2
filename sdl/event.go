@@ -24,6 +24,17 @@ func (t EventType) IsUserEvent() bool {
 	return t >= UserEventType && t <= LastEventType
 }
 
+// String returns the name of the event type.
+func (t EventType) String() string {
+	if name := eventTypeNames[t]; name != "" {
+		return name
+	} else if t.IsUserEvent() {
+		return fmt.Sprintf("UserEvent %d", uint32(t))
+	} else {
+		return fmt.Sprintf("EventType(%d)", uint32(t))
+	}
+}
+
 // Special event numbers
 const (
 	FirstEventType EventType = C.SDL_FIRSTEVENT
@@ -113,6 +124,56 @@ const (
 const (
 	DropFileEventType EventType = C.SDL_DROPFILE
 )
+
+var eventTypeNames = map[EventType]string{
+	QuitEventType: "Quit",
+
+	AppTerminatingEventType:         "AppTerminating",
+	AppLowMemoryEventType:           "AppLowMemory",
+	AppWillEnterBackgroundEventType: "AppWillEnterBackground",
+	AppDidEnterBackgroundEventType:  "AppDidEnterBackground",
+	AppWillEnterForegroundEventType: "AppWillEnterForeground",
+	AppDidEnterForegroundEventType:  "AppDidEnterForeground",
+
+	WindowEventType: "Window",
+	SysWMEventType:  "SysWM",
+
+	KeyDownEventType:     "KeyDown",
+	KeyUpEventType:       "KeyUp",
+	TextEditingEventType: "TextEditing",
+	TextInputEventType:   "TextInput",
+
+	MouseMotionEventType:     "MouseMotion",
+	MouseButtonDownEventType: "MouseButtonDown",
+	MouseButtonUpEventType:   "MouseButtonUp",
+	MouseWheelEventType:      "MouseWheel",
+
+	JoyAxisMotionEventType:    "JoyAxisMotion",
+	JoyBallMotionEventType:    "JoyBallMotion",
+	JoyHatMotionEventType:     "JoyHatMotion",
+	JoyButtonDownEventType:    "JoyButtonDown",
+	JoyButtonUpEventType:      "JoyButtonUp",
+	JoyDeviceAddedEventType:   "JoyDeviceAdded",
+	JoyDeviceRemovedEventType: "JoyDeviceRemoved",
+
+	ControllerAxisMotionEventType:     "ControllerAxisMotion",
+	ControllerButtonDownEventType:     "ControllerButtonDown",
+	ControllerButtonUpEventType:       "ControllerButtonUp",
+	ControllerDeviceAddedEventType:    "ControllerDeviceAdded",
+	ControllerDeviceRemovedEventType:  "ControllerDeviceRemoved",
+	ControllerDeviceRemappedEventType: "ControllerDeviceRemapped",
+
+	FingerDownEventType:   "FingerDown",
+	FingerUpEventType:     "FingerUp",
+	FingerMotionEventType: "FingerMotion",
+
+	DollarGestureEventType: "DollarGesture",
+	DollarRecordEventType:  "DollarRecord",
+	MultiGestureEventType:  "MultiGesture",
+
+	ClipboardUpdateEventType: "ClipboardUpdate",
+	DropFileEventType:        "DropFile",
+}
 
 // END EventType }}}1
 
