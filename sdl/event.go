@@ -441,11 +441,12 @@ type WindowEvent struct {
 	Data1, Data2 int32
 }
 
-// EventType returns WindowEventType.
+// Type returns WindowEventType.
 func (e *WindowEvent) Type() EventType {
 	return WindowEventType
 }
 
+// Timestamp returns the number of milliseconds since the SDL library initialization.
 func (e *WindowEvent) Timestamp() uint32 {
 	return e.Time
 }
@@ -489,6 +490,7 @@ type KeyboardEvent struct {
 	KeySym
 }
 
+// Type returns KeyDownEventType or KeyUpEventType.
 func (e *KeyboardEvent) Type() EventType {
 	if e.Pressed {
 		return KeyDownEventType
@@ -497,10 +499,12 @@ func (e *KeyboardEvent) Type() EventType {
 	}
 }
 
+// Timestamp returns the number of milliseconds since the SDL library initialization.
 func (e *KeyboardEvent) Timestamp() uint32 {
 	return e.Time
 }
 
+// Window returns the window with keyboard focus or zero.
 func (e *KeyboardEvent) Window() uint32 {
 	return e.WindowID
 }
@@ -530,6 +534,7 @@ func (e *TextEditingEvent) Type() EventType {
 	return TextEditingEventType
 }
 
+// Timestamp returns the number of milliseconds since the SDL library initialization.
 func (e *TextEditingEvent) Timestamp() uint32 {
 	return e.Time
 }
@@ -561,6 +566,7 @@ func (e *TextInputEvent) Type() EventType {
 	return TextInputEventType
 }
 
+// Timestamp returns the number of milliseconds since the SDL library initialization.
 func (e *TextInputEvent) Timestamp() uint32 {
 	return e.Time
 }
@@ -589,6 +595,7 @@ func (e *MouseMotionEvent) Type() EventType {
 	return MouseMotionEventType
 }
 
+// Timestamp returns the number of milliseconds since the SDL library initialization.
 func (e *MouseMotionEvent) Timestamp() uint32 {
 	return e.Time
 }
@@ -623,6 +630,7 @@ func (e *MouseButtonEvent) Type() EventType {
 	}
 }
 
+// Timestamp returns the number of milliseconds since the SDL library initialization.
 func (e *MouseButtonEvent) Timestamp() uint32 {
 	return e.Time
 }
@@ -654,6 +662,7 @@ func (e *MouseWheelEvent) Type() EventType {
 	return MouseWheelEventType
 }
 
+// Timestamp returns the number of milliseconds since the SDL library initialization.
 func (e *MouseWheelEvent) Timestamp() uint32 {
 	return e.Time
 }
@@ -680,6 +689,7 @@ func (e *JoyAxisEvent) Type() EventType {
 	return JoyAxisMotionEventType
 }
 
+// Timestamp returns the number of milliseconds since the SDL library initialization.
 func (e *JoyAxisEvent) Timestamp() uint32 {
 	return e.Time
 }
@@ -701,6 +711,7 @@ func (e *JoyBallEvent) Type() EventType {
 	return JoyBallMotionEventType
 }
 
+// Timestamp returns the number of milliseconds since the SDL library initialization.
 func (e *JoyBallEvent) Timestamp() uint32 {
 	return e.Time
 }
@@ -722,6 +733,7 @@ func (e *JoyHatEvent) Type() EventType {
 	return JoyHatMotionEventType
 }
 
+// Timestamp returns the number of milliseconds since the SDL library initialization.
 func (e *JoyHatEvent) Timestamp() uint32 {
 	return e.Time
 }
@@ -747,6 +759,7 @@ func (e *JoyButtonEvent) Type() EventType {
 	}
 }
 
+// Timestamp returns the number of milliseconds since the SDL library initialization.
 func (e *JoyButtonEvent) Timestamp() uint32 {
 	return e.Time
 }
@@ -771,6 +784,7 @@ func (e *JoyDeviceEvent) Type() EventType {
 	}
 }
 
+// Timestamp returns the number of milliseconds since the SDL library initialization.
 func (e *JoyDeviceEvent) Timestamp() uint32 {
 	return e.Time
 }
@@ -792,6 +806,7 @@ func (e *ControllerAxisEvent) Type() EventType {
 	return ControllerAxisMotionEventType
 }
 
+// Timestamp returns the number of milliseconds since the SDL library initialization.
 func (e *ControllerAxisEvent) Timestamp() uint32 {
 	return e.Time
 }
@@ -817,6 +832,7 @@ func (e *ControllerButtonEvent) Type() EventType {
 	}
 }
 
+// Timestamp returns the number of milliseconds since the SDL library initialization.
 func (e *ControllerButtonEvent) Timestamp() uint32 {
 	return e.Time
 }
@@ -837,6 +853,7 @@ func (e *ControllerDeviceEvent) Type() EventType {
 	return e.EventType
 }
 
+// Timestamp returns the number of milliseconds since the SDL library initialization.
 func (e *ControllerDeviceEvent) Timestamp() uint32 {
 	return e.Time
 }
@@ -859,6 +876,7 @@ func (e *UserEvent) Type() EventType {
 	return e.EventType
 }
 
+// Timestamp returns the number of milliseconds since the SDL library initialization.
 func (e *UserEvent) Timestamp() uint32 {
 	return e.Time
 }
@@ -888,6 +906,7 @@ func (e *TouchFingerEvent) Type() EventType {
 	return e.EventType
 }
 
+// Timestamp returns the number of milliseconds since the SDL library initialization.
 func (e *TouchFingerEvent) Timestamp() uint32 {
 	return e.Time
 }
@@ -911,6 +930,7 @@ func (e *MultiGestureEvent) Type() EventType {
 	return MultiGestureEventType
 }
 
+// Timestamp returns the number of milliseconds since the SDL library initialization.
 func (e *MultiGestureEvent) Timestamp() uint32 {
 	return e.Time
 }
@@ -939,6 +959,7 @@ func (e *DollarGestureEvent) Type() EventType {
 	}
 }
 
+// Timestamp returns the number of milliseconds since the SDL library initialization.
 func (e *DollarGestureEvent) Timestamp() uint32 {
 	return e.Time
 }
@@ -958,6 +979,7 @@ func (e *DropEvent) Type() EventType {
 	return DropFileEventType
 }
 
+// Timestamp returns the number of milliseconds since the SDL library initialization.
 func (e *DropEvent) Timestamp() uint32 {
 	return e.Time
 }
