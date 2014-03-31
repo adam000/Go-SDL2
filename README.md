@@ -8,3 +8,13 @@ Examples of how to use these packages are available
 [here](https://github.com/adam000/go-sdl-gl-examples).
 
 *This software is provided free of charge. See LICENSE for details.*
+
+# Installing
+
+The packages are designed to be go-getable, but they require that the underlying
+C library be installed first.  The cgo directives depend on the availability of
+pkg-config for the SDL libraries.  The packages are separated by the SDL library
+required.
+
+* `github.com/adam000/Go-SDL2/sdl/...` requires SDL2 2.0.2 or higher.
+* `github.com/adam000/Go-SDL2/image` requires SDL2\_image-2.0.0 or higher.

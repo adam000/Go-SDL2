@@ -267,6 +267,7 @@ func convertEvent(cEvent unsafe.Pointer) Event {
 			Which:    uint32(ce.which),
 			Button:   MouseButton(ce.button),
 			Pressed:  ce.state == C.SDL_PRESSED,
+			Clicks:   uint8(ce.clicks),
 			X:        int32(ce.x),
 			Y:        int32(ce.y),
 		}
@@ -616,9 +617,8 @@ type MouseButtonEvent struct {
 	Which    uint32
 	Button   MouseButton
 	Pressed  bool
-	// TODO(light): this is only available in SDL 2.0.2 and above
-	// Clicks uint8 // number of clicks in sequence: 1 for single-click, 2 for double-click, etc.
-	X, Y int32
+	Clicks   uint8 // number of clicks in sequence: 1 for single-click, 2 for double-click, etc.
+	X, Y     int32
 }
 
 // Type returns either MouseButtonDownEventType or MouseButtonUpEventType.
