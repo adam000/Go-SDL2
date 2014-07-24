@@ -7,14 +7,10 @@ import (
 	"unsafe"
 )
 
-//////////////////////////////////////////
-// Contains Window and Renderer methods /
-////////////////////////////////////////
-
-// Window Handling
-
+// WindowFlag is a window creation option.
 type WindowFlag uint32
 
+// Window creation options.
 const (
 	WindowFullscreen        WindowFlag = C.SDL_WINDOW_FULLSCREEN
 	WindowOpenGL            WindowFlag = C.SDL_WINDOW_OPENGL
@@ -32,78 +28,104 @@ const (
 	WindowFullscreenDesktop WindowFlag = C.SDL_WINDOW_FULLSCREEN_DESKTOP
 )
 
-const WindowPosUndefined = C.SDL_WINDOWPOS_UNDEFINED
-const WindowPosCentered = C.SDL_WINDOWPOS_CENTERED
-
-type Renderer struct {
-	r *C.SDL_Renderer
-}
-
-type RendererFlags uint32
-
+// Window positions.  Used for the origin in NewWindow.
 const (
-	RendererSoftware RendererFlags = 1 << iota
-	RendererAccelerated
-	RendererPresentVsync
-	RendererTargetTexture
+	WindowPosUndefined = C.SDL_WINDOWPOS_UNDEFINED
+	WindowPosCentered  = C.SDL_WINDOWPOS_CENTERED
 )
 
-const TextureFormatsSize int = 16
-
+// RendererInfo describes the capabilities of a Renderer.
 type RendererInfo struct {
 	Name             string
-	Flags            RendererFlags
+	Flags            RendererFlag
 	TextureFormats   []PixelFormatEnum
 	MaxTextureWidth  int
 	MaxTextureHeight int
 }
 
+// Window is a window in a GUI environment.
 type Window struct {
-	w *C.SDL_Window
-	r *Renderer
+	w C.SDL_Window
 }
 
-// Create a new window
-func NewWindow(title string, x, y, w, h int, flags WindowFlag) (Window, error) {
-	if window := C.SDL_CreateWindow(C.CString(title), C.int(x), C.int(y), C.int(w), C.int(h),
-		C.Uint32(flags)); window != nil {
-
-		return Window{window, nil}, nil
+// NewWindow creates a new window.  r.x or r.y may also be
+// WindowPosCentered or WindowPosUndefined.  Multiple flags will be
+// ORed together.
+func NewWindow(title string, r Rectangle, flags ...WindowFlag) (*Window, error) {
+	ctitle := C.CString(title)
+	defer C.free(unsafe.Pointer(ctitle))
+	var f WindowFlag
+	for i := range flags {
+		f |= flags[i]
 	}
-
-	return Window{}, GetError()
-}
-
-// Get the window's surface
-func (w Window) GetSurface() *Surface {
-	return (*Surface)(unsafe.Pointer(C.SDL_GetWindowSurface(w.w)))
-}
-
-func (w Window) Destroy() {
-	C.SDL_DestroyWindow(w.w)
-}
-
-// Renderer functions
-
-func NewRenderer(window Window, index int, flags uint32) (Renderer, error) {
-	if r := C.SDL_CreateRenderer(window.w, C.int(index), C.Uint32(flags)); r != nil {
-		return Renderer{r}, nil
+	w := C.SDL_CreateWindow(
+		ctitle,
+		C.int(r.Origin.X),
+		C.int(r.Origin.Y),
+		C.int(r.W),
+		C.int(r.H),
+		C.Uint32(f))
+	if w == nil {
+		return nil, GetError()
 	}
-
-	return Renderer{}, GetError()
+	return (*Window)(unsafe.Pointer(w)), nil
 }
 
-func (w Window) Renderer() (Renderer, error) {
-	r := C.SDL_GetRenderer(w.w)
+// Surface returns the window's surface.
+func (w *Window) Surface() *Surface {
+	return (*Surface)(unsafe.Pointer(C.SDL_GetWindowSurface(&w.w)))
+}
+
+// CreateRenderer creates a 2D rendering context for a window.
+// driverIndex is the index of the rendering driver to initialize, or -1
+// to initialize the first one that supports the requested
+// configuration.  Multiple flags will be ORed together.
+func (w *Window) CreateRenderer(driverIndex int, flags ...RendererFlag) (*Renderer, error) {
+	var f RendererFlag
+	for i := range flags {
+		f |= flags[i]
+	}
+	r := C.SDL_CreateRenderer(&w.w, C.int(driverIndex), C.Uint32(f))
 	if r == nil {
-		return Renderer{}, GetError()
+		return nil, GetError()
 	}
-	return Renderer{r}, nil
+	return (*Renderer)(unsafe.Pointer(r)), nil
 }
 
-func (r Renderer) Info() (*RendererInfo, error) {
+// Renderer returns the window's renderer or nil if it doesn't have one.
+func (w *Window) Renderer() *Renderer {
+	return (*Renderer)(unsafe.Pointer(C.SDL_GetRenderer(&w.w)))
+}
+
+// Destroy destroys a window.
+func (w *Window) Destroy() {
+	C.SDL_DestroyWindow(&w.w)
+}
+
+// A Renderer represents the rendering state.
+type Renderer struct {
+	r C.SDL_Renderer
+}
+
+// A RendererFlag is an option for creating a renderer.
+type RendererFlag uint32
+
+// Renderer creation flags.
+const (
+	// Software fallback
+	RendererSoftware RendererFlag = C.SDL_RENDERER_SOFTWARE
+	// Hardware accelerated
+	RendererAccelerated RendererFlag = C.SDL_RENDERER_ACCELERATED
+	// Present is synchronized with the refresh rate
+	RendererPresentVSync RendererFlag = C.SDL_RENDERER_PRESENTVSYNC
+	// Render to texture support
+	RendererTargetTexture RendererFlag = C.SDL_RENDERER_TARGETTEXTURE
+)
+
+// Info returns the renderer's capabilities.
+func (r *Renderer) Info() (*RendererInfo, error) {
 	var info C.SDL_RendererInfo
-	if C.SDL_GetRendererInfo(r.r, &info) != 0 {
+	if C.SDL_GetRendererInfo(&r.r, &info) != 0 {
 		return nil, GetError()
 	}
 
@@ -113,33 +135,35 @@ func (r Renderer) Info() (*RendererInfo, error) {
 	}
 	return &RendererInfo{
 		Name:             C.GoString(info.name),
-		Flags:            RendererFlags(info.flags),
+		Flags:            RendererFlag(info.flags),
 		TextureFormats:   formats,
 		MaxTextureWidth:  int(info.max_texture_width),
 		MaxTextureHeight: int(info.max_texture_height),
 	}, nil
 }
 
-func (r Renderer) Destroy() {
-	C.SDL_DestroyRenderer(r.r)
-}
-
-// SDL_RenderCopy
-func (r Renderer) CopyTexture(texture *Texture, srcRect, destRect *Rectangle) error {
-	if C.SDL_RenderCopy(r.r, &texture.t, srcRect.toCRect(), destRect.toCRect()) != 0 {
+// CopyTexture copies a portion of the texture to the current rendering context.
+func (r *Renderer) CopyTexture(texture *Texture, srcRect, destRect *Rectangle) error {
+	if C.SDL_RenderCopy(&r.r, &texture.t, srcRect.toCRect(), destRect.toCRect()) != 0 {
 		return GetError()
 	}
 	return nil
 }
 
 // Clear clears the current rendering target with the drawing color.
-func (r Renderer) Clear() error {
-	if C.SDL_RenderClear(r.r) != 0 {
+func (r *Renderer) Clear() error {
+	if C.SDL_RenderClear(&r.r) != 0 {
 		return GetError()
 	}
 	return nil
 }
 
-func (r Renderer) Present() {
-	C.SDL_RenderPresent(r.r)
+// Present updates the screen with rendering performed.
+func (r *Renderer) Present() {
+	C.SDL_RenderPresent(&r.r)
+}
+
+// Destroy destroys the renderer.
+func (r *Renderer) Destroy() {
+	C.SDL_DestroyRenderer(&r.r)
 }

@@ -43,15 +43,7 @@ func (surface *Surface) PixelData() (PixelData, error) {
 	return PixelData{s: &surface.s}, nil
 }
 
-// SDL_CreateTextureFromSurface
-func (surface *Surface) ToTexture(renderer Renderer) (*Texture, error) {
-	txt := C.SDL_CreateTextureFromSurface(renderer.r, &surface.s)
-	if txt == nil {
-		return nil, GetError()
-	}
-	return (*Texture)(unsafe.Pointer(txt)), nil
-}
-
+// Free destroys the surface.
 func (surface *Surface) Free() {
 	C.SDL_FreeSurface(&surface.s)
 }

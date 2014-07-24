@@ -62,8 +62,10 @@ func makeSymmetricProjectionMatrix() mat.Matrix {
 
 // Draw something! in SDL using OpenGL with shaders / retained mode
 func main() {
-	const height int = 1024
-	const width int = 768
+	const (
+		width  = 1024
+		height = 768
+	)
 
 	triVertexes := [][3]gl.GLfloat{
 		{2.0, 0.0, -5.0},
@@ -81,7 +83,10 @@ func main() {
 	sdl.Init(sdl.InitEverything)
 	defer sdl.Quit()
 
-	window, err := sdl.NewWindow("Hello world!", sdl.WindowPosCentered, sdl.WindowPosCentered, height, width, sdl.WindowOpenGL)
+	window, err := sdl.NewWindow(
+		"Hello world!",
+		sdl.Rect(sdl.WindowPosCentered, sdl.WindowPosCentered, width, height),
+		sdl.WindowOpenGL)
 	if err != nil {
 		panic(err)
 	}
