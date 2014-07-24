@@ -21,7 +21,8 @@ func NewTextureFromSurface(renderer *Renderer, surface *Surface) (*Texture, erro
 	return (*Texture)(unsafe.Pointer(tex)), nil
 }
 
-// Destroy destroys the texture.
+// Destroy destroys the texture.  The texture should not be used after
+// calling Destroy.
 func (t *Texture) Destroy() {
 	C.SDL_DestroyTexture(&t.t)
 }

@@ -24,6 +24,15 @@ sdl.Main.
 			// make SDL calls here
 		})
 	}
+
+Pointers And Destruction
+
+These bindings will return pointers to the actual underlying SDL
+structures in many places.  These data types will not be garbage-
+collected because they are allocated by C.  When you are finished
+with such a pointer, you must call the Destroy method.  Any further
+usage of a pointer after the Destroy call will likely lead to a
+dangling pointer issue.
 */
 package sdl
 

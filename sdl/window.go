@@ -97,7 +97,8 @@ func (w *Window) Renderer() *Renderer {
 	return (*Renderer)(unsafe.Pointer(C.SDL_GetRenderer(&w.w)))
 }
 
-// Destroy destroys a window.
+// Destroy destroys a window.  It is not safe to use the window after
+// calling Destroy.
 func (w *Window) Destroy() {
 	C.SDL_DestroyWindow(&w.w)
 }
@@ -163,7 +164,8 @@ func (r *Renderer) Present() {
 	C.SDL_RenderPresent(&r.r)
 }
 
-// Destroy destroys the renderer.
+// Destroy destroys the renderer.  The renderer should not be used after
+// calling Destroy.
 func (r *Renderer) Destroy() {
 	C.SDL_DestroyRenderer(&r.r)
 }
