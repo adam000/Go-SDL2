@@ -63,7 +63,7 @@ func run() error {
 	return nil
 }
 
-func mainLoop(renderer sdl.Renderer, textures []sdl.Texture) {
+func mainLoop(renderer sdl.Renderer, textures []*sdl.Texture) {
 	currTex := 0
 	for {
 		// Poll for events
@@ -117,8 +117,8 @@ func openWindow(title string, size sdl.Point) (sdl.Window, sdl.Renderer, error) 
 	return window, renderer, err
 }
 
-func loadImages(names []string) ([]sdl.Surface, error) {
-	surfaces := make([]sdl.Surface, 0, len(names))
+func loadImages(names []string) ([]*sdl.Surface, error) {
+	surfaces := make([]*sdl.Surface, 0, len(names))
 	for _, name := range names {
 		s, err := image.Load(name)
 		if err != nil {
@@ -129,8 +129,8 @@ func loadImages(names []string) ([]sdl.Surface, error) {
 	return surfaces, nil
 }
 
-func convertToTextures(renderer sdl.Renderer, surfaces []sdl.Surface) ([]sdl.Texture, error) {
-	textures := make([]sdl.Texture, 0, len(surfaces))
+func convertToTextures(renderer sdl.Renderer, surfaces []*sdl.Surface) ([]*sdl.Texture, error) {
+	textures := make([]*sdl.Texture, 0, len(surfaces))
 	for _, s := range surfaces {
 		t, err := s.ToTexture(renderer)
 		if err != nil {
@@ -141,7 +141,7 @@ func convertToTextures(renderer sdl.Renderer, surfaces []sdl.Surface) ([]sdl.Tex
 	return textures, nil
 }
 
-func maxSize(s []sdl.Surface) sdl.Point {
+func maxSize(s []*sdl.Surface) sdl.Point {
 	var size sdl.Point
 	for _, ss := range s {
 		z := ss.Size()

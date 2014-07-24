@@ -11,17 +11,11 @@ import (
 
 // Surface is a rectangular array of pixels.
 type Surface struct {
-	s *C.SDL_Surface
-}
-
-// InternalSurface creates a surface from an SDL_Surface pointer.
-// This should only be used by other SDL packages.
-func InternalSurface(p unsafe.Pointer) Surface {
-	return Surface{(*C.SDL_Surface)(p)}
+	s C.SDL_Surface
 }
 
 // PixelFormat returns the surface's pixel format.
-func (surface Surface) PixelFormat() *PixelFormat {
+func (surface *Surface) PixelFormat() *PixelFormat {
 	return &PixelFormat{
 		Format:        PixelFormatEnum(surface.s.format.format),
 		BitsPerPixel:  uint8(surface.s.format.BitsPerPixel),
@@ -34,32 +28,40 @@ func (surface Surface) PixelFormat() *PixelFormat {
 }
 
 // Size returns the surface's width and height.
-func (surface Surface) Size() Point {
+func (surface *Surface) Size() Point {
 	return Point{int(surface.s.w), int(surface.s.h)}
 }
 
-func (surface Surface) PixelData() (PixelData, error) {
-	if result := C.SDL_LockSurface(surface.s); result < 0 {
+// PixelData locks the surface and returns a PixelData value,
+// which can be used to access and modify the surface's pixels.
+// The returned PixelData must be closed before the surface can be
+// used again.
+func (surface *Surface) PixelData() (PixelData, error) {
+	if result := C.SDL_LockSurface(&surface.s); result < 0 {
 		return PixelData{}, GetError()
 	}
-	return PixelData{s: surface.s}, nil
+	return PixelData{s: &surface.s}, nil
 }
 
 // SDL_CreateTextureFromSurface
-func (surface Surface) ToTexture(renderer Renderer) (Texture, error) {
-	txt := C.SDL_CreateTextureFromSurface(renderer.r, surface.s)
+func (surface *Surface) ToTexture(renderer Renderer) (*Texture, error) {
+	txt := C.SDL_CreateTextureFromSurface(renderer.r, &surface.s)
 	if txt == nil {
-		return Texture{}, GetError()
+		return nil, GetError()
 	}
-	return Texture{txt}, nil
+	return (*Texture)(unsafe.Pointer(txt)), nil
 }
 
-func (surface Surface) Free() {
-	C.SDL_FreeSurface(surface.s)
+func (surface *Surface) Free() {
+	C.SDL_FreeSurface(&surface.s)
 }
 
-// Implements the image.Image and draw.Image interfaces
-// See: http://golang.org/pkg/image/#Image http://golang.org/pkg/image/draw/#Image
+// PixelData is a mutable view of a surface's pixels.  The data is only
+// available while a surface is locked, so pixel data should be closed to
+// allow the surface to be used again.
+//
+// PixelData implements the image.Image and draw.Image interfaces.
+// See: http://golang.org/pkg/image/#Image and http://golang.org/pkg/image/draw/#Image.
 type PixelData struct {
 	s *C.SDL_Surface
 }
@@ -80,6 +82,7 @@ func getPixelPointer(pixels uintptr, x, y, bytesPerPixel, pitch int) unsafe.Poin
 	return unsafe.Pointer(pixels + uintptr(offset))
 }
 
+// At returns the pixel at the given position.
 func (pix PixelData) At(x, y int) color.Color {
 	format := pix.s.format
 	bytesPerPixel := int(format.BytesPerPixel)
@@ -108,12 +111,13 @@ func (pix PixelData) At(x, y int) color.Color {
 	return col
 }
 
+// ColorModel returns the color model of the pixel data.
 func (pix PixelData) ColorModel() color.Model {
 	// TODO this is a guess
 	return color.NRGBAModel
 }
 
-// PixelData doesn't actually know where it is on the screen, so return (0,0) => (w,h)
+// Bounds returns a rectangle of (0,0) => (w,h).
 func (pix PixelData) Bounds() image.Rectangle {
 	return image.Rectangle{image.Point{0, 0}, image.Point{int(pix.s.w), int(pix.s.h)}}
 }
@@ -126,7 +130,7 @@ func collapseColor(pixel *uint32, color uint8, shift, loss C.Uint8) {
 	*pixel = *pixel & temp
 }
 
-// Set the color at an x, y position in the PixelData to a given color.
+// Set sets the color at an x, y position in the PixelData to a given color.
 func (pix PixelData) Set(x, y int, c color.Color) {
 	format := pix.s.format
 	bytesPerPixel := int(format.BytesPerPixel)
@@ -157,6 +161,8 @@ func (pix PixelData) Set(x, y int, c color.Color) {
 	}
 }
 
+// Close unlocks the underlying surface.  pix should not be used after
+// calling Close.
 func (pix PixelData) Close() error {
 	C.SDL_UnlockSurface(pix.s)
 	return nil

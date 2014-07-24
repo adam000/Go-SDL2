@@ -4,9 +4,9 @@ package sdl
 import "C"
 
 type Texture struct {
-	t *C.SDL_Texture
+	t C.SDL_Texture
 }
 
-func (t Texture) Destroy() {
-	C.SDL_DestroyTexture(t.t)
+func (t *Texture) Destroy() {
+	C.SDL_DestroyTexture(&t.t)
 }

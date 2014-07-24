@@ -41,13 +41,13 @@ func Quit() {
 }
 
 // Load reads an image from a file.
-func Load(file string) (sdl.Surface, error) {
+func Load(file string) (*sdl.Surface, error) {
 	cfile := C.CString(file)
 	defer C.free(unsafe.Pointer(cfile))
 	surf := C.IMG_Load(cfile)
 
 	if surf == nil {
-		return sdl.InternalSurface(nil), sdl.GetError()
+		return nil, sdl.GetError()
 	}
-	return sdl.InternalSurface(unsafe.Pointer(surf)), nil
+	return (*sdl.Surface)(unsafe.Pointer(surf)), nil
 }

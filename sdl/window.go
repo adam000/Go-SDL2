@@ -3,6 +3,10 @@ package sdl
 // #include "SDL.h"
 import "C"
 
+import (
+	"unsafe"
+)
+
 //////////////////////////////////////////
 // Contains Window and Renderer methods /
 ////////////////////////////////////////
@@ -71,8 +75,8 @@ func NewWindow(title string, x, y, w, h int, flags WindowFlag) (Window, error) {
 }
 
 // Get the window's surface
-func (w Window) GetSurface() Surface {
-	return Surface{C.SDL_GetWindowSurface(w.w)}
+func (w Window) GetSurface() *Surface {
+	return (*Surface)(unsafe.Pointer(C.SDL_GetWindowSurface(w.w)))
 }
 
 func (w Window) Destroy() {
@@ -121,8 +125,8 @@ func (r Renderer) Destroy() {
 }
 
 // SDL_RenderCopy
-func (r Renderer) CopyTexture(texture Texture, srcRect, destRect *Rectangle) error {
-	if C.SDL_RenderCopy(r.r, texture.t, srcRect.toCRect(), destRect.toCRect()) != 0 {
+func (r Renderer) CopyTexture(texture *Texture, srcRect, destRect *Rectangle) error {
+	if C.SDL_RenderCopy(r.r, &texture.t, srcRect.toCRect(), destRect.toCRect()) != 0 {
 		return GetError()
 	}
 	return nil
