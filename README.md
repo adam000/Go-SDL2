@@ -7,6 +7,10 @@ bindings for SDL packages such as SDL-ttf, SDL-image, and more.
 Examples of how to use these packages are available
 [here](https://github.com/adam000/go-sdl-gl-examples).
 
+**These bindings are still experimental and the API is subject to change.**
+There will eventually be an API freeze when the bindings are more
+complete and tested.
+
 *This software is provided free of charge. See LICENSE for details.*
 
 # Installing
