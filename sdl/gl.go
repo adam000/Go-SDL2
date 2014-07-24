@@ -26,7 +26,8 @@ func (ctx GLContext) MakeCurrent(w *Window) error {
 	return nil
 }
 
-// Destroy deletes the GLContext
+// Destroy destroys the OpenGL context.  It is not safe to use the
+// context after Destroy is called.
 func (ctx GLContext) Destroy() {
 	C.SDL_GL_DeleteContext(ctx.c)
 }

@@ -43,8 +43,9 @@ func (surface *Surface) PixelData() (PixelData, error) {
 	return PixelData{s: &surface.s}, nil
 }
 
-// Free destroys the surface.
-func (surface *Surface) Free() {
+// Destroy destroys the surface.  The surface should not be used after
+// a call to Destroy.
+func (surface *Surface) Destroy() {
 	C.SDL_FreeSurface(&surface.s)
 }
 
@@ -153,9 +154,8 @@ func (pix PixelData) Set(x, y int, c color.Color) {
 	}
 }
 
-// Close unlocks the underlying surface.  pix should not be used after
-// calling Close.
-func (pix PixelData) Close() error {
+// Destroy unlocks the underlying surface.  pix should not be used after
+// calling Destroy.
+func (pix PixelData) Destroy() {
 	C.SDL_UnlockSurface(pix.s)
-	return nil
 }
