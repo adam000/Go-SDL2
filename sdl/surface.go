@@ -60,7 +60,7 @@ type PixelData struct {
 }
 
 // Expand out a component of a color from a pixel representing the color.
-// TODO unit tests
+// TODO(adam): unit tests
 func expandColor(pixel uint32, mask C.Uint32, shift, loss C.Uint8) uint8 {
 	temp := pixel & uint32(mask)
 	temp = temp >> uint8(shift)
@@ -83,12 +83,12 @@ func (pix PixelData) At(x, y int) color.Color {
 	ptr := getPixelPointer(uintptr(pix.s.pixels), x, y, bytesPerPixel, int(pix.s.pitch))
 	pixel := *(*uint32)(ptr)
 
-	// TODO not necesarily NRGBA (which would be an entirely different codepath)
+	// TODO(adam): not necesarily NRGBA (which would be an entirely different codepath)
 	var col color.NRGBA
 
 	switch bytesPerPixel {
 	case 1:
-		// TODO look up the color in color palette
+		// TODO(adam): look up the color in color palette
 	case 2, 3, 4:
 		col.R = expandColor(pixel, format.Rmask, format.Rshift, format.Rloss)
 		col.G = expandColor(pixel, format.Gmask, format.Gshift, format.Gloss)
@@ -106,7 +106,7 @@ func (pix PixelData) At(x, y int) color.Color {
 
 // ColorModel returns the color model of the pixel data.
 func (pix PixelData) ColorModel() color.Model {
-	// TODO this is a guess
+	// TODO(adam): this is a guess
 	return color.NRGBAModel
 }
 
@@ -116,7 +116,7 @@ func (pix PixelData) Bounds() image.Rectangle {
 }
 
 // Collapse a component of the color into a pointer at a pixel representing the color.
-// TODO unit tests
+// TODO(adam): unit tests
 func collapseColor(pixel *uint32, color uint8, shift, loss C.Uint8) {
 	temp := uint32(color >> uint8(loss))
 	temp = temp << uint8(shift)
@@ -130,7 +130,7 @@ func (pix PixelData) Set(x, y int, c color.Color) {
 
 	switch bytesPerPixel {
 	case 1:
-		// TODO look up the color in color palette
+		// TODO(adam): look up the color in color palette
 	case 2, 3, 4:
 		// if necessary, convert color model to NRGBA
 		col := pix.ColorModel().Convert(c).(color.NRGBA)
