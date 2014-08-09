@@ -67,20 +67,19 @@ func expandColor(pixel uint32, mask C.Uint32, shift, loss C.Uint8) uint8 {
 	return uint8(temp << uint8(loss))
 }
 
-// Takes a uintptr to the pixel data from an SDL Surface and returns a pointer to the particular
-// pixel referenced by parameters.
-// Pitch is the number of bytes that make up one horizontal row (same as the field in SDL_Surface)
-func getPixelPointer(pixels uintptr, x, y, bytesPerPixel, pitch int) unsafe.Pointer {
-	offset := x*bytesPerPixel + y*pitch
-	return unsafe.Pointer(pixels + uintptr(offset))
+// getPixelPointer returns the address of the pixel at (x, y) relative
+// to a base pointer.  pitch is the number of bytes in a horizontal row.
+func getPixelPointer(pixels unsafe.Pointer, x, y int, bytesPerPixel, pitch uintptr) unsafe.Pointer {
+	offset := uintptr(x)*bytesPerPixel + uintptr(y)*pitch
+	return unsafe.Pointer(uintptr(pixels) + offset)
 }
 
 // At returns the pixel at the given position.
 func (pix PixelData) At(x, y int) color.Color {
 	format := pix.s.format
-	bytesPerPixel := int(format.BytesPerPixel)
+	bytesPerPixel := uintptr(format.BytesPerPixel)
 
-	ptr := getPixelPointer(uintptr(pix.s.pixels), x, y, bytesPerPixel, int(pix.s.pitch))
+	ptr := getPixelPointer(pix.s.pixels, x, y, bytesPerPixel, uintptr(pix.s.pitch))
 	pixel := *(*uint32)(ptr)
 
 	// TODO(adam): not necesarily NRGBA (which would be an entirely different codepath)
@@ -126,7 +125,7 @@ func collapseColor(pixel *uint32, color uint8, shift, loss C.Uint8) {
 // Set sets the color at an x, y position in the PixelData to a given color.
 func (pix PixelData) Set(x, y int, c color.Color) {
 	format := pix.s.format
-	bytesPerPixel := int(format.BytesPerPixel)
+	bytesPerPixel := uintptr(format.BytesPerPixel)
 
 	switch bytesPerPixel {
 	case 1:
@@ -147,7 +146,7 @@ func (pix PixelData) Set(x, y int, c color.Color) {
 		collapseColor(pixel, col.A, format.Ashift, format.Aloss)
 
 		// get pixel offset that's (x, y)
-		ptr := getPixelPointer(uintptr(pix.s.pixels), x, y, bytesPerPixel, int(pix.s.pitch))
+		ptr := getPixelPointer(pix.s.pixels, x, y, bytesPerPixel, uintptr(pix.s.pitch))
 
 		// slap it in
 		*(*uint32)(ptr) = *pixel
