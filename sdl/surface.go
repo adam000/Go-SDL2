@@ -67,39 +67,35 @@ func expandColor(pixel uint32, mask C.Uint32, shift, loss C.Uint8) uint8 {
 	return uint8(temp << uint8(loss))
 }
 
-// getPixelPointer returns the address of the pixel at (x, y) relative
-// to a base pointer.  pitch is the number of bytes in a horizontal row.
-func getPixelPointer(pixels unsafe.Pointer, x, y int, bytesPerPixel, pitch uintptr) unsafe.Pointer {
-	offset := uintptr(x)*bytesPerPixel + uintptr(y)*pitch
-	return unsafe.Pointer(uintptr(pixels) + offset)
+// pixel returns the address of the pixel at (x, y).
+func (pix PixelData) pixel(x, y int) unsafe.Pointer {
+	offset := uintptr(y)*uintptr(pix.s.pitch) + uintptr(x)*uintptr(pix.s.format.BytesPerPixel)
+	return unsafe.Pointer(uintptr(pix.s.pixels) + offset)
 }
 
 // At returns the pixel at the given position.
 func (pix PixelData) At(x, y int) color.Color {
 	format := pix.s.format
-	bytesPerPixel := uintptr(format.BytesPerPixel)
-
-	ptr := getPixelPointer(pix.s.pixels, x, y, bytesPerPixel, uintptr(pix.s.pitch))
-	pixel := *(*uint32)(ptr)
-
+	ptr := pix.pixel(x, y)
 	// TODO(adam): not necesarily NRGBA (which would be an entirely different codepath)
 	var col color.NRGBA
 
-	switch bytesPerPixel {
-	case 1:
-		// TODO(adam): look up the color in color palette
-	case 2, 3, 4:
+	switch format.BytesPerPixel {
+	case 4:
+		pixel := *(*uint32)(ptr)
 		col.R = expandColor(pixel, format.Rmask, format.Rshift, format.Rloss)
 		col.G = expandColor(pixel, format.Gmask, format.Gshift, format.Gloss)
 		col.B = expandColor(pixel, format.Bmask, format.Bshift, format.Bloss)
-		// If the alpha mask is 0, there's no alpha component, so set it to 1
+		// If the alpha mask is 0, there's no alpha component, so set it opaque.
 		if format.Amask == 0 {
-			col.A = 1
+			col.A = ^uint8(0)
 		} else {
 			col.A = expandColor(pixel, format.Amask, format.Ashift, format.Aloss)
 		}
+	default:
+		// TODO(#22): handle all pixel formats
+		panic("pixel format not handled")
 	}
-
 	return col
 }
 
@@ -111,45 +107,34 @@ func (pix PixelData) ColorModel() color.Model {
 
 // Bounds returns a rectangle of (0,0) => (w,h).
 func (pix PixelData) Bounds() image.Rectangle {
-	return image.Rectangle{image.Point{0, 0}, image.Point{int(pix.s.w), int(pix.s.h)}}
+	return image.Rect(0, 0, int(pix.s.w), int(pix.s.h))
 }
 
-// Collapse a component of the color into a pointer at a pixel representing the color.
+// collapseColor collapses a component of the color into an OR'able mask.
 // TODO(adam): unit tests
-func collapseColor(pixel *uint32, color uint8, shift, loss C.Uint8) {
-	temp := uint32(color >> uint8(loss))
-	temp = temp << uint8(shift)
-	*pixel = *pixel & temp
+func collapseColor(color uint8, shift, loss C.Uint8) uint32 {
+	return uint32(color) >> loss << shift
 }
 
 // Set sets the color at an x, y position in the PixelData to a given color.
 func (pix PixelData) Set(x, y int, c color.Color) {
 	format := pix.s.format
-	bytesPerPixel := uintptr(format.BytesPerPixel)
-
-	switch bytesPerPixel {
-	case 1:
-		// TODO(adam): look up the color in color palette
-	case 2, 3, 4:
-		// if necessary, convert color model to NRGBA
+	switch format.BytesPerPixel {
+	case 4:
 		col := pix.ColorModel().Convert(c).(color.NRGBA)
 
-		// put that in a uint32 that I can slap into the void* of pixel data (also helper function?)
-		var pixel *uint32
-		collapseColor(pixel, col.R, format.Rshift, format.Rloss)
-		collapseColor(pixel, col.G, format.Gshift, format.Gloss)
-		collapseColor(pixel, col.B, format.Bshift, format.Bloss)
-		// If the alpha mask is 0, there's no alpha component, so set it to 1
+		p := (*uint32)(pix.pixel(x, y))
+		*p = collapseColor(col.R, format.Rshift, format.Rloss)
+		*p |= collapseColor(col.G, format.Gshift, format.Gloss)
+		*p |= collapseColor(col.B, format.Bshift, format.Bloss)
 		if format.Amask == 0 {
-			col.A = 1
+			// If the alpha mask is 0, there's no alpha component, so set it opaque.
+			col.A = ^uint8(0)
 		}
-		collapseColor(pixel, col.A, format.Ashift, format.Aloss)
-
-		// get pixel offset that's (x, y)
-		ptr := getPixelPointer(pix.s.pixels, x, y, bytesPerPixel, uintptr(pix.s.pitch))
-
-		// slap it in
-		*(*uint32)(ptr) = *pixel
+		*p |= collapseColor(col.A, format.Ashift, format.Aloss)
+	default:
+		// TODO(#22): handle all pixel formats
+		panic("pixel format not handled")
 	}
 }
 
