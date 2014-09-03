@@ -97,6 +97,14 @@ func (w *Window) Renderer() *Renderer {
 	return (*Renderer)(unsafe.Pointer(C.SDL_GetRenderer(&w.w)))
 }
 
+// Size returns the size of the SDL window, in pixels.
+func (w *Window) Size() (int, int) {
+	var width C.int
+	var height C.int
+	C.SDL_GetWindowSize(&w.w, &width, &height)
+	return int(width), int(height)
+}
+
 // Destroy destroys a window.  It is not safe to use the window after
 // calling Destroy.
 func (w *Window) Destroy() {
